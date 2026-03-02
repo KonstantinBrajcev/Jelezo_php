@@ -1,0 +1,650 @@
+/* map_styles.css */
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#map {
+    width: 100%;
+    height: 100vh;
+}
+
+/* Дополнительные стили для карты */
+.balloon-content {
+    max-width: 250px;
+    padding: 0px 5px !important;
+}
+
+.balloon-field {
+    margin-bottom: 5px;
+}
+
+.balloon-label {
+    font-weight: bold;
+    color: #555;
+}
+
+.balloon-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.balloon-button {
+    background: #2c7be5;
+    color: white;
+    border: none;
+    padding: 5px 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.balloon-button:hover {
+    background: #1a6bd8;
+}
+
+.call-button {
+    background: #28a745;
+}
+
+.call-button:hover {
+    background: #218838;
+}
+
+.control-button {
+    font-size: 18px;
+    background: white;
+    /* border: 2px solid #4CAF50; */
+    color: #4CAF50;
+    padding: 10px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* min-width: 140px; */
+    justify-content: center;
+}
+
+.control-button:hover {
+    background: #4CAF50;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.back-button {
+    border-color: #2196F3;
+    color: #2196F3;
+}
+
+.back-button:hover {
+    background: #2196F3;
+    color: white;
+}
+
+.map-controls,
+.counter-panel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 900;
+    display: flex;
+    border-radius: 8px;
+    flex-direction: column;
+    align-items: center;
+    flex-flow: nowrap;
+    justify-content: center;
+}
+
+/* Счетчик объектов */
+.counter-panel {
+    width: 150px;
+    top: 10px !important;
+    padding: 10px 10px;
+    left: 10px !important;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    gap: 5px;
+}
+
+.counter-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    /* font-size: 16px; */
+}
+
+.counter-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2196F3;
+}
+
+/* Балун */
+.balloon-content {
+    max-width: 300px;
+}
+
+.balloon-field {
+    display: flex;
+    align-items: center;
+    margin: 2px 0;
+    line-height: 1.4;
+}
+
+.balloon-label {
+    font-weight: bold;
+    color: #666;
+    display: inline-block;
+    min-width: 80px;
+}
+
+.balloon-button {
+    flex: 1;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.balloon-button:hover {
+    background: #45a049;
+}
+
+.call-button {
+    background: #2196F3;
+}
+
+.call-button:hover {
+    background: #1976D2;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+
+/* Загрузка */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    font-size: 20px;
+    color: #4CAF50;
+}
+
+/* СКРЫТИЕ КОПИРАЙТОВ И ПРОМО-БЛОКОВ */
+.ymaps-2-1-79-copyright__wrap,
+.ymaps-2-1-79-copyright__content,
+.ymaps-2-1-79-copyrights-pane,
+.ymaps-2-1-79-controls__control_toolbar {
+    display: none !important;
+}
+
+.ymaps-2-1-79-balloon__content {
+    padding: 5px 5px;
+}
+
+.ymaps-2-1-79-b-cluster-content {
+    font: 12 Arial, Helvetica, sans-serif;
+}
+
+.ymaps-2-1-79-b-cluster-tabs__section_type_content {
+    padding-left: 0px !important;
+}
+
+.ymaps-2-1-79-b-cluster-tabs__menu-item {
+    display: block;
+    margin-bottom: 0px !important;
+    padding: 0px 0px 0px 0px !important;
+}
+
+.ymaps-2-1-79-b-cluster-tabs__item-body {
+    padding-right: 10px !important;
+}
+
+.balloon-title {
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #2196F3;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 5px;
+    margin: 0 !important;
+    padding: 2px !important;
+}
+
+.ymaps-2-1-79-b-cluster-tabs__menu-item-text .balloon-title {
+    font-size: 12px !important;
+    text-align: left;
+}
+
+.ymaps-2-1-79-balloon__layout,
+.ymaps-2-1-79-balloon {
+    border-radius: 8px;
+}
+
+.ymaps-2-1-79-balloon-content__header {
+    text-align: center;
+}
+
+.ymaps-2-1-79-b-cluster-tabs__menu-item-text {
+    font-size: 12px !important;
+}
+
+.balloon-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.ymaps-2-1-79-b-cluster-tabs__section ymaps-2-1-79-b-cluster-tabs__section_type_nav {
+    width: 120px;
+}
+
+.ymaps-2-1-79-balloon__close {
+    display: none;
+}
+
+.ymaps-2-1-79-balloon__content {
+    margin-right: 0px !important;
+}
+
+/* Самый сильный селектор */
+.ymaps-2-1-79-balloon__content>ymaps[style*="width: 480px"] {
+    width: 380px !important;
+    max-width: 380px !important;
+}
+
+/* И для внутренних элементов */
+.ymaps-2-1-79-b-cluster-tabs {
+    width: 375px !important;
+    max-width: 375px !important;
+}
+
+
+
+
+/* Стили для элементов балуна в стиле index.php */
+.balloon-field {
+    display: flex;
+    align-items: flex-start;
+    margin: 8px 0;
+    line-height: 1.4;
+    flex-wrap: wrap;
+}
+
+.balloon-label {
+    font-weight: bold;
+    color: #666;
+    min-width: 80px;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.balloon-value {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Ссылки в стиле index.php */
+.balloon-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid;
+    font-size: 14px;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+.phone-link.balloon-link {
+    color: #2196F3;
+    background-color: #f0f8ff;
+    border-color: #bbdefb;
+}
+
+.phone-link.balloon-link:hover {
+    background-color: #e3f2fd;
+    color: #1976D2;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(33, 150, 243, 0.2);
+}
+
+.address-link.balloon-link {
+    color: #4CAF50;
+    background-color: #f1f8e9;
+    border-color: #c8e6c9;
+}
+
+.address-link.balloon-link:hover {
+    background-color: #e8f5e8;
+    color: #388E3C;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(76, 175, 80, 0.2);
+}
+
+/* Для нет данных */
+.balloon-no-data {
+    color: #999;
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* Кнопка ТО в балуне */
+.balloon-service-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+.balloon-service-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.balloon-service-btn i {
+    font-size: 16px;
+}
+
+/* Убедимся, что контент балуна не слишком широкий */
+.ymaps-2-1-79-balloon__content {
+    max-width: 450px !important;
+    padding: 10px !important;
+}
+
+/* .balloon-content {
+    max-width: 100%;
+} */
+
+/* Адаптивность для балуна */
+@media (max-width: 768px) {
+    .balloon-field {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .balloon-label {
+        min-width: auto;
+        margin-bottom: 2px;
+    }
+
+    .balloon-link {
+        padding: 3px 6px;
+        font-size: 13px;
+    }
+
+    .balloon-service-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+
+
+    /* Адаптивность */
+
+    .map-controls {
+        top: 10px;
+        right: 10px;
+    }
+
+    .counter-panel {
+        top: 10px;
+        left: 10px;
+        min-width: 150px;
+        padding: 10px 15px;
+    }
+
+    .control-button {
+        /* min-width: 150px; */
+        padding: 10px 15px;
+        font-size: 18px;
+    }
+
+    .filter-panel {
+        top: 80px;
+        left: 10px;
+        right: 10px;
+    }
+}
+
+/* СТИЛИ ПРОГРЕСБАРА */
+.progress-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.80);
+    padding: 5px 10px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 900;
+    border-top: 1px solid #ddd;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.progress-title {
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+}
+
+.progress-percentage {
+    font-weight: bold;
+    color: #2196F3;
+    font-size: 16px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    font-weight: bold;
+    font-size: 12px;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.progress-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #666;
+    flex-wrap: wrap;
+}
+
+.progress-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 90px;
+    margin: 2px 0;
+}
+
+.stat-value {
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+}
+
+/* Цвета для статусов */
+.status-working {
+    color: #4CAF50;
+}
+
+.status-remarks {
+    color: #FF9800;
+}
+
+.status-not-working {
+    color: #f44336;
+}
+
+.status-total {
+    color: #2196F3;
+}
+
+.status-remaining {
+    color: #f44336;
+}
+
+.status-on-map {
+    color: #9C27B0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .progress-header {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .progress-stats {
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .progress-stat {
+        min-width: 80px;
+        flex: 0 0 auto;
+    }
+
+    .stat-label {
+        font-size: 10px;
+    }
+
+    .stat-value {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .progress-stat {
+        min-width: 70px;
+    }
+
+    .stat-label {
+        font-size: 9px;
+    }
+}
+
+/* Стили для сообщений на карте */
+.map-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 4px;
+    color: white;
+    font-size: 14px;
+    z-index: 10000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease;
+    max-width: 300px;
+}
+
+.map-message.success {
+    background-color: #4CAF50;
+}
+
+.map-message.error {
+    background-color: #f44336;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

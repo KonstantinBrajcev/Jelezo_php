@@ -1,0 +1,83 @@
+/* assets/css/charts_styles.css */
+
+.stats-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.stats-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+}
+
+.stats-icon.bg-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stats-icon.bg-success {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.stats-icon.bg-warning {
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+}
+
+.stats-icon.bg-info {
+  background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+}
+
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1.2rem 1.5rem;
+}
+
+.card-header h5 {
+  font-weight: 600;
+  color: #333;
+}
+
+.table th {
+  font-weight: 600;
+  color: #666;
+  border-top: none;
+}
+
+.table td {
+  color: #333;
+  vertical-align: middle;
+  padding: 3px 5px;
+}
+
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+
+  .stats-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+}

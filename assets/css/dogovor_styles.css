@@ -1,0 +1,227 @@
+/* assets/css/dogovor_styles.css */
+.button-group {
+    flex-wrap: wrap;
+    margin-top: 5px;
+    display: flex;
+    gap: 10px;
+}
+
+.map-button,
+.refresh-button {
+    flex: 1;
+    padding: 10px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.map-button {
+    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+    color: white;
+    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+}
+
+.map-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+    background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow-x: auto;
+    /* padding: 5px; */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* .controls {
+    margin: 10px 0;
+} */
+
+.user-info {
+    display: flex;
+    justify-content: space-between;
+    margin: 0px 10px;
+}
+
+.map-button {
+    background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+    color: white;
+    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+}
+
+.map-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+    background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
+}
+
+.form-label {
+    margin-bottom: 0px;
+    font-size: 13px;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.form-group .label {
+    padding: 10px 15px;
+}
+
+.status-active {
+    color: green;
+}
+
+.status-inactive {
+    color: red;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, .075);
+}
+
+.modal-body {
+    padding: 5px 10px;
+}
+
+thead {
+    text-align-last: center;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+tr {
+
+    text-align: center;
+}
+
+th:hover {
+    background-color: #45a049;
+}
+
+th.sort-asc::after {
+    content: " ▲";
+    font-size: 12px;
+}
+
+th.sort-desc::after {
+    content: " ▼";
+    font-size: 12px;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f0f0f0;
+}
+
+
+.actions-column {
+    text-align: center;
+    text-wrap-mode: nowrap;
+    /* min-width: 180px; */
+    width: 5%;
+}
+
+.count {
+    margin: 15px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+.modal-lg-top {
+    max-width: 850px;
+}
+
+.modal-footer {
+    border: none;
+    padding-top: 5px;
+}
+
+.modal-header {
+    border: none;
+    padding-bottom: 5px;
+}
+
+.card-body {
+    padding: 0px;
+}
+
+.card-header {
+    padding: 5px 5px;
+}
+
+/* Адаптивная таблица с постепенным скрытием колонок */
+@media (max-width: 1200px) {
+
+    /* ИСЧЕЗАЕТ КОЛОНКА СРОК */
+    #dogovorTable th:nth-child(4),
+    #dogovorTable td:nth-child(4) {
+        display: none;
+    }
+}
+
+@media (max-width: 992px) {
+
+    /* ИСЧЕЗАЕТ КОЛОНКА СТАТУС */
+    #dogovorTable th:nth-child(5),
+    #dogovorTable td:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* ИСЧЕЗАЕТ КОЛОНКА ДАТА */
+    #dogovorTable th:nth-child(3),
+    #dogovorTable td:nth-child(3) {
+        display: none;
+    }
+
+    .table#dogovorTable {
+        margin-top: 10px !important;
+    }
+}
+
+@media (max-width: 576px) {
+
+    #dogovorTable th:nth-child(5),
+    #dogovorTable td:nth-child(5) {
+        display: none;
+    }
+
+    .adaptive-table::after {
+        display: block;
+    }
+
+}
