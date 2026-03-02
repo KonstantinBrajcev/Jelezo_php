@@ -1,0 +1,36 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+    
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        # host: ${{ secrets.SERVER_HOST }}
+        host: ${{ secrets.SSH_HOST }}
+        # username: ${{ secrets.SERVER_USERNAME }}
+        username: ${{ secrets.SSH_USERNAME }}
+        # key: ${{ secrets.SSH_PRIVATE_KEY }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        # port: ${{ secrets.SSH_PORT }}
+        script: |
+          cd /var/www/jelezo.by/TEST
+          git pull origin main
+          # Дополнительные команды
+          chmod -R 755 assets/uploads
+          # Перезапуск PHP-FPM если нужно
+          # sudo systemctl reload php8.1-fpm
