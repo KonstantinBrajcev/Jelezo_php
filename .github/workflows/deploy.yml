@@ -20,7 +20,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SERVER_PORT }}
         script: |
-          cd /var/www/jelezo.by/TEST
+          cd www/jelezo.by/TEST
           git pull origin main
           chmod -R 755 assets/uploads
           # Перезапуск PHP-FPM если нужно
