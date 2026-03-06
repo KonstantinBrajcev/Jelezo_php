@@ -11,23 +11,23 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Debug SSH key
-      env:
-        SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SSH_HOST: 178.159.242.118
-        SSH_USER: user2142861
-        SSH_PORT: 22
+    
+    - name: Create deployment package
       run: |
-        echo "Testing SSH connection..."
-        echo "$SSH_KEY" > /tmp/debug_key
-        chmod 600 /tmp/debug_key
-        ssh -v -p 22 -i /tmp/debug_key \
-          -o StrictHostKeyChecking=no \
-          user2142861@178.159.242.118 \
-          "echo 'Connection successful'"
-
-    - name: Deploy via SSH
+        tar -czf deploy.tar.gz --exclude=.git --exclude=.github .
+    
+    - name: Copy files via SCP
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: 178.159.242.118
+        username: user2142861
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        source: "deploy.tar.gz"
+        target: "www/jelezo.by/TEMP"
+        strip_components: 0
+    
+    - name: Extract files on server
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: 178.159.242.118
@@ -35,6 +35,14 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          cd www/jelezo.by/TEST
-          git pull origin main
-          chmod -R 755 assets/uploads
+          cd www/jelezo.by
+          # Создаем папку TEST если её нет
+          mkdir -p TEST
+          # Распаковываем архив
+          tar -xzf TEMP/deploy.tar.gz -C TEST/
+          # Удаляем архив
+          rm -rf TEMP
+          # Права доступа
+          chmod -R 755 TEST/assets/uploads || true
+          cd TEST
+          echo "Deployment completed at $(date)" > deployment.log
