@@ -20,7 +20,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         source: "."
-        target: "www/jelezo.by/TEST"
+        target: "www/jelezo.by"
         strip_components: 0
         rm: true  # Удалять старые файлы
     
@@ -32,6 +32,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          cd www/jelezo.by/TEST
+          cd www/jelezo.by
           chmod -R 755 assets/uploads 2>/dev/null || true
           echo "✅ Deployed at $(date)" > deployment.log
