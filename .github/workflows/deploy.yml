@@ -19,6 +19,6 @@ jobs:
       env:
         SSHPASS: ${{ secrets.SERVER_PASSWORD }}
       run: |
-        sshpass -e ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} \
+        sshpass -e ssh -o StrictHostKeyChecking=no -p 22 \
           ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} \
           "cd www/jelezo.by/TEST && git pull origin main && chmod -R 755 assets/uploads"
