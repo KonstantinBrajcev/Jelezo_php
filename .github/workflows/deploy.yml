@@ -11,7 +11,17 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+
+    - name: Debug SSH key
+      run: |
+        echo "Testing SSH connection..."
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/debug_key
+        chmod 600 /tmp/debug_key
+        ssh -v -p ${{ secrets.SERVER_PORT }} -i /tmp/debug_key \
+          -o StrictHostKeyChecking=no \
+          ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} \
+          "echo 'Connection successful'"
+
     - name: Deploy via SSH
       uses: appleboy/ssh-action@v1.0.0
       with:
