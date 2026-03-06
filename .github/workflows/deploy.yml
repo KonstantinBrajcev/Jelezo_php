@@ -12,13 +12,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    - name: Deploy to server via rsync
-      uses: burnett01/rsync-deployments@6.0.0
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.0
       with:
-        switches: -avzr --delete --exclude=.git --exclude=.github
-        path: ./
-        remote_path: www/jelezo.by/TEST/
-        remote_host: ${{ secrets.SERVER_HOST }}
-        remote_user: ${{ secrets.SERVER_USERNAME }}
-        remote_key: ${{ secrets.SSH_PRIVATE_KEY }}  # или используйте remote_password
-        remote_port: ${{ secrets.SERVER_PORT }}
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SERVER_PORT }}
+        script: |
+          cd www/jelezo.by/TEST
+          git pull origin main
+          chmod -R 755 assets/uploads
