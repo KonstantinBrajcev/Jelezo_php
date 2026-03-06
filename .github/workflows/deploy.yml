@@ -12,10 +12,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    - name: Create deployment package
-      run: |
-        tar -czf deploy.tar.gz --exclude=.git --exclude=.github .
-    
     - name: Copy files via SCP
       uses: appleboy/scp-action@v0.1.7
       with:
@@ -23,11 +19,12 @@ jobs:
         username: user2142861
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
-        source: "deploy.tar.gz"
-        target: "www/jelezo.by/TEMP"
+        source: "."
+        target: "www/jelezo.by/TEST"
         strip_components: 0
+        rm: true  # Удалять старые файлы
     
-    - name: Extract files on server
+    - name: Set permissions
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: 178.159.242.118
@@ -35,14 +32,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
-          cd www/jelezo.by
-          # Создаем папку TEST если её нет
-          mkdir -p TEST
-          # Распаковываем архив
-          tar -xzf TEMP/deploy.tar.gz -C TEST/
-          # Удаляем архив
-          rm -rf TEMP
-          # Права доступа
-          chmod -R 755 TEST/assets/uploads || true
-          cd TEST
-          echo "Deployment completed at $(date)" > deployment.log
+          cd www/jelezo.by/TEST
+          chmod -R 755 assets/uploads 2>/dev/null || true
+          echo "✅ Deployed at $(date)" > deployment.log
