@@ -13,13 +13,18 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Debug SSH key
+      env:
+        SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST: ${{ secrets.SERVER_HOST }}
+        SSH_USER: ${{ secrets.SERVER_USERNAME }}
+        SSH_PORT: ${{ secrets.SERVER_PORT }}
       run: |
         echo "Testing SSH connection..."
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/debug_key
+        echo "$SSH_KEY" > /tmp/debug_key
         chmod 600 /tmp/debug_key
-        ssh -v -p ${{ secrets.SERVER_PORT }} -i /tmp/debug_key \
+        ssh -v -p ${SSH_PORT} -i /tmp/debug_key \
           -o StrictHostKeyChecking=no \
-          ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} \
+          ${SSH_USER}@${SSH_HOST} \
           "echo 'Connection successful'"
 
     - name: Deploy via SSH
