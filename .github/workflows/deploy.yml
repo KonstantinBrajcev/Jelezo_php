@@ -16,7 +16,7 @@ jobs:
       uses: appleboy/scp-action@v0.1.7
       with:
         host: 178.159.242.118
-        username: user2142861
+        username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         source: "."
@@ -28,7 +28,7 @@ jobs:
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: 178.159.242.118
-        username: user2142861
+        username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
