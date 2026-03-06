@@ -15,16 +15,16 @@ jobs:
     - name: Debug SSH key
       env:
         SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SSH_HOST: ${{ secrets.SERVER_HOST }}
-        SSH_USER: ${{ secrets.SERVER_USERNAME }}
-        SSH_PORT: ${{ secrets.SERVER_PORT }}
+        SSH_HOST: 178.159.242.118
+        SSH_USER: user2142861
+        SSH_PORT: 22
       run: |
         echo "Testing SSH connection..."
         echo "$SSH_KEY" > /tmp/debug_key
         chmod 600 /tmp/debug_key
-        ssh -v -p ${SSH_PORT} -i /tmp/debug_key \
+        ssh -v -p 22 -i /tmp/debug_key \
           -o StrictHostKeyChecking=no \
-          ${SSH_USER}@${SSH_HOST} \
+          user2142861@178.159.242.118 \
           "echo 'Connection successful'"
 
     - name: Deploy via SSH
