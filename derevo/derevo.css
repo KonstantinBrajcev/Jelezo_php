@@ -50,19 +50,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 5px 5px;
     position: relative;
     width: fit-content;
-    /* Ширина по содержимому */
-}
-
-.couple {
-    display: flex;
-    gap: 10px;
-    margin: 5px 5px;
-    position: relative;
-    border: dashed;
-    border-radius: 10px;
 }
 
 .person.male {
@@ -139,22 +128,78 @@ body {
     margin-bottom: 10px;
 }
 
+
+/* Альтернативное решение с использованием Flexbox и псевдоэлементов */
 .children {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+    padding-top: 10px;
     position: relative;
-    border-top: 2px solid #000;
 }
 
-.couple::before {
+.children::before {
     content: '';
     position: absolute;
+    top: -30px;
     left: 50%;
-    top: 100%;
     transform: translateX(-50%);
-    width: 5px;
-    height: 10px;
-    background-color: currentColor;
+    width: 2px;
+    height: 30px;
+    background-color: #999;
 }
+
+/* Каждый блок детей должен иметь позиционирование */
+.children > .family-branch {
+    position: relative;
+}
+
+
+/* Линия от текущего элемента вправо (для всех, кроме последнего) */
+.children > .family-branch:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    right: 0; 
+    width: 50%; 
+    height: 2px;
+    background-color: #999;
+}
+
+/* Линия от текущего элемента влево (для всех, кроме первого) */
+.children > .family-branch:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    width: 50%; /* Идем влево до середины промежутка */
+    height: 2px;
+    background-color: #999;
+}
+
+/* Для первого элемента убираем левую линию (на всякий случай) */
+.children > .family-branch:first-child::before {
+    display: none;
+}
+
+/* Для последнего элемента убираем правую линию */
+.children > .family-branch:last-child::after {
+    display: none;
+}
+
+/* Для одного ребенка - убираем все линии */
+.children.single-child::before,
+.children.single-child > .family-branch::after,
+.children.single-child > .family-branch::before {
+    display: none;
+}
+
+.children.single-child {
+    border-top: none;
+    padding-top: 0;
+}
+
 
 .modal {
     display: none;
@@ -164,6 +209,7 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
 }
 
 .modal-content {
@@ -263,6 +309,7 @@ body {
     display: inline-block;
     vertical-align: top;
     text-align: center;
+    z-index: 100;
 }
 
 .person-header {
@@ -336,7 +383,7 @@ body {
     color: #d32f2f;
 }
 
-/* .settings-menu-overlay {
+.settings-menu-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -348,4 +395,54 @@ body {
 
 .settings-menu-overlay.show {
     display: block;
-} */
+}
+
+.person-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 5px;
+    border: dashed;
+    border-radius: 10px;
+}
+
+
+.person-container::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 40px;
+    background-color: #999;
+}
+
+.spouse-below::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 40px;
+    background-color: #999;
+}
+
+.spouse-below {
+    margin-top: 5px;
+    position: relative;
+}
+
+/* Добавляем соединительную линию между супругами */
+.spouse-below::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 15px;
+    background-color: #999;
+}
+

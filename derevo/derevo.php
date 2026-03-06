@@ -354,6 +354,7 @@ function renderTree($db) {
 }
 
 // Рекурсивная функция для отображения человека и его детей
+// Рекурсивная функция для отображения человека и его детей
 function renderPersonWithChildren($db, $person, $spouse, $level, &$processedPeople) {
     if (!$person || in_array($person['id'], $processedPeople)) {
         return '';
@@ -427,7 +428,7 @@ function renderPersonWithChildren($db, $person, $spouse, $level, &$processedPeop
     $parents = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Формируем HTML
-        $output = '<div class="family-branch">';
+    $output = '<div class="family-branch">';
     
     // Отображаем родителей (если есть и если мы не на слишком высоком уровне)
     if ($parents && $level < 3) {
@@ -441,20 +442,32 @@ function renderPersonWithChildren($db, $person, $spouse, $level, &$processedPeop
         $output .= '</div>';
     }
     
-    // Отображаем текущую пару
-    $output .= '<div class="couple">';
+    // ИЗМЕНЕНИЕ: Отображаем текущего человека (родственника) наверху
+    $output .= '<div class="person-container">';
+    
+    // Отображаем основного человека (родственника)
     $output .= renderPerson($person, true);
+    
+    // Отображаем супруга под ним (если есть)
     if ($spouse && !in_array($spouse['id'], $processedPeople)) {
+        $output .= '<div class="spouse-below">';
         $output .= renderPerson($spouse, true);
+        $output .= '</div>';
         $processedPeople[] = $spouse['id'];
     }
+    
     $output .= '</div>';
     
     // Отображаем детей
     if ($children) {
-        $output .= '<div class="children">';
+        // Добавляем класс в зависимости от количества детей
+        $childrenClass = 'children';
+        if (count($children) === 1) {
+            $childrenClass .= ' single-child';
+        }
         
-        // Вместо группировки по парам, просто отображаем всех детей
+        $output .= '<div class="' . $childrenClass . '">';
+        
         foreach ($children as $child) {
             // Пропускаем уже обработанных детей
             if (in_array($child['id'], $processedPeople)) {
