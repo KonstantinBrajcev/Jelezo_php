@@ -255,7 +255,7 @@ try {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach (array_slice($customerTotals, 0, 20) as $customer): ?>
+                                    <?php foreach (array_slice($customerTotals, 0, 30) as $customer): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($customer['customer']) ?></td>
                                         <td class="text-end"><?= number_format($customer['total'], 2, '.', ' ') ?></td>
