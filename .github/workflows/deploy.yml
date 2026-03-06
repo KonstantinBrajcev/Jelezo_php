@@ -20,10 +20,11 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
     
-    - name: Deploy via SSH with password
-      env:
-        SSHPASS: ${{ secrets.SERVER_PASSWORD }}
+    - name: Deploy via SSH
       run: |
-        sshpass -e ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} \
+        sshpass -e ssh -v -o StrictHostKeyChecking=no -o PreferredAuthentications=password \
+          -o PubkeyAuthentication=no -p ${{ secrets.SERVER_PORT }} \
           ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} \
           "cd www/jelezo.by/TEST && git pull origin main && chmod -R 755 assets/uploads"
+      env:
+        SSHPASS: ${{ secrets.SERVER_PASSWORD }}
