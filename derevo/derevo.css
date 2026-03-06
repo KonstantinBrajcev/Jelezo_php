@@ -40,10 +40,13 @@ body {
     min-width: 0;
     height: 100%;
     overflow: auto;
+    white-space: nowrap;
 }
 
 .tree-container {
     display: inline-block;
+    min-width: 100%; /* Минимальная ширина на весь экран */
+    white-space: nowrap; /* Запрещаем перенос внутри контейнера */
 }
 
 .family-branch {
@@ -132,7 +135,7 @@ body {
 /* Альтернативное решение с использованием Flexbox и псевдоэлементов */
 .children {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
     margin-top: 20px;
     padding-top: 10px;
