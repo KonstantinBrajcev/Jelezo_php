@@ -1,10 +1,12 @@
 <?php
-// update_object.php - Обработчик обновления записей
-
-// Настройки подключения к базе данных
-$databaseFile = 'db.sqlite3';
-
+// modules/problem/update_object.php - Обработчик обновления записей
+require_once __DIR__ . '/../../includes/config.php';
+require_once __DIR__ . '/../../modules/auth/auth.php';
 header('Content-Type: application/json');
+// Настройки подключения к базе данных
+// $databaseFile = 'db.sqlite3';
+
+// header('Content-Type: application/json');
 
 try {
     // Получаем данные из POST запроса
@@ -21,7 +23,7 @@ try {
     }
     
     // Подключаемся к базе данных
-    $pdo = new PDO("sqlite:" . $databaseFile);
+    $pdo = new PDO("sqlite:" . DB_PATH);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Получаем информацию о таблице

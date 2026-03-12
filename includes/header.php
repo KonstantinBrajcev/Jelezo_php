@@ -15,11 +15,10 @@
     // Получаем текущий URL без параметров и без расширения
     $currentPage = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $currentPage = rtrim($currentPage, '/'); // Убираем trailing slash
-    // $currentPage = str_replace('.php', '', $currentPage); // Убираем .php если есть
     
     // Если пустая строка или корень - это index
     if ($currentPage === '' || $currentPage === '/') {
-        $currentPage = '/index';
+        $currentPage = '/index.php';
     }
     ?>
 

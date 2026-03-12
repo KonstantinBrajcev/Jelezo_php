@@ -38,7 +38,7 @@ function saveChanges() {
     document.getElementById('loading').style.display = 'block';
     hideMessage();
 
-    fetch('update_object.php', {
+    fetch('/modules/service/update_object.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
