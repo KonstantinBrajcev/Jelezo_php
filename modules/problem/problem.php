@@ -188,7 +188,7 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
                     <!-- <th>ID</th> -->
                     <th>Название</th>
                     <th>Создано</th>
-                    <th>Статус</th>
+                    <th></th>
                     <!-- <th>User</th> -->
                     <th></th>
                     <th></th>
@@ -202,12 +202,12 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
                     <!-- <td><?= $problem['id'] ?></td> -->
                     <td style="text-align: left;"><?= htmlspecialchars($problem['name']) ?></td>
                     <td><?= $problem['created_date'] ?></td>
-                    <td>
+                    <td  style="text-align: right;">
                         <form method="POST" style="display: inline;" onsubmit="return toggleComplete(event, this)">
                             <input type="hidden" name="action" value="toggle_complete">
                             <input type="hidden" name="id" value="<?= $problem['id'] ?>">
-                            <button type="submit" class="status-badge <?= $problem['is_completed'] ? 'status-completed' : 'status-active' ?>">
-                                <?= $problem['is_completed'] ? 'Завершено' : 'Активно' ?>
+                            <button type="submit" class="status-badge  <?= $problem['is_completed'] ? 'status-completed' : 'status-active' ?>" style="width: 30px;">
+                                <?= $problem['is_completed'] ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>' ?>
                             </button>
                         </form>
                     </td>

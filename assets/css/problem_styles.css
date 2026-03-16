@@ -201,7 +201,7 @@ input[type="number"] {
 .status-badge {
     padding: 4px 8px;
     border-radius: 4px;
-    font-size: 12px;
+    /* font-size: 12px; */
     font-weight: bold;
     border: none;
     cursor: pointer;

@@ -273,9 +273,9 @@ try {
                                             <tr>
                                                 <th>Должность</th>
                                                 <th class="text-center">%</th>
-                                                <th class="text-center">Чистые (BYN)</th>
-                                                <th class="text-center">Отчисления (BYN)</th>
-                                                <th class="text-center">Грязные (BYN)</th>
+                                                <th class="text-center">Чистые</th>
+                                                <th class="text-center">Отчисления</th>
+                                                <th class="text-center">Грязные</th>
                                             </tr>
                                         </thead>
                                         <tbody>
