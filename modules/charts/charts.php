@@ -223,30 +223,152 @@ try {
 
 
 
-        </div>
-
-        <div class="row g-4 mt-2 d-flex align-items-stretch">
-            <!-- Суммы по заказчикам -->
-            <div class="col-lg-8">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Суммы по заказчикам</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="customerChart" style="height: 100%; min-height: 500px;"></canvas>
+            <!-- НОВЫЙ БЛОК: Распределение зарплаты -->
+            <!-- <div class="row g-4"> -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Распределение фонда оплаты труда</h5>
+                        </div>
+                        <div class="card-body">
+                            <?php
+                            // Данные о зарплате
+                            $salaryData = [
+                                ['position' => 'Директор (Брайцев)', 'percent' => 12.9],
+                                ['position' => 'Маркетолог (Берсенева)', 'percent' => 11.5],
+                                ['position' => 'Гл. бухгалтер (Евтухова)', 'percent' => 9],
+                                ['position' => 'Электромеханик по подъемникам (Кравченко)', 'percent' => 8.7],
+                                ['position' => 'Электромеханик по подъемникам (Короткий)', 'percent' => 8],
+                                ['position' => 'Электромеханик по подъемникам (Гамалеев)', 'percent' => 3],
+                                ['position' => 'Автомеханик (Беликов)', 'percent' => 5]
+                            ];
+                            
+                            // Рассчитываем среднемесячную сумму и фонд оплаты
+                            $averageMonthlyTotal = $yearTotal / 12;
+                            $monthlySalaryFund = $averageMonthlyTotal * 0.20; // 20% от среднемесячной суммы
+                            
+                            // Суммируем проценты для проверки
+                            $totalPercent = array_sum(array_column($salaryData, 'percent'));
+                            
+                            // Рассчитываем итоговые суммы для подвала таблицы
+                            $totalCleanSum = 0;
+                            $totalDeductions = 0;
+                            $totalGross = 0;
+                            
+                            foreach ($salaryData as $employee) {
+                                $cleanSum = $averageMonthlyTotal * ($employee['percent'] / 100);
+                                $deductions = $cleanSum * 0.34;
+                                $gross = $cleanSum + $deductions;
+                                
+                                $totalCleanSum += $cleanSum;
+                                $totalDeductions += $deductions;
+                                $totalGross += $gross;
+                            }
+                            ?>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Должность</th>
+                                                <th class="text-center">%</th>
+                                                <th class="text-center">Чистые (BYN)</th>
+                                                <th class="text-center">Отчисления (BYN)</th>
+                                                <th class="text-center">Грязные (BYN)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php 
+                                            foreach ($salaryData as $employee): 
+                                                // Рассчитываем суммы для каждого сотрудника
+                                                $cleanSum = $averageMonthlyTotal * ($employee['percent'] / 100);
+                                                $deductions = $cleanSum * 0.34;
+                                                $gross = $cleanSum + $deductions;
+                                            ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars($employee['position']) ?></td>
+                                                <td class="text-end"><?= $employee['percent'] ?>%</td>
+                                                <td class="text-end"><?= number_format($cleanSum, 2, '.', ' ') ?></td>
+                                                <td class="text-end"><?= number_format($deductions, 2, '.', ' ') ?></td>
+                                                <td class="text-end"><?= number_format($gross, 2, '.', ' ') ?></td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                        <tfoot class="table-light">
+                                            <tr>
+                                                <th colspan="2" class="text-end">Итого:</th>
+                                                <th class="text-end"><?= number_format($totalCleanSum, 2, '.', ' ') ?></th>
+                                                <th class="text-end"><?= number_format($totalDeductions, 2, '.', ' ') ?></th>
+                                                <th class="text-end"><?= number_format($totalGross, 2, '.', ' ') ?></th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="4" class="text-end">Прибыль:</th>
+                                                <th class="text-end"><?= number_format($averageMonthlyTotal - $totalGross, 2, '.', ' ') ?></th>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="5" class="text-muted small">
+                                                    * Расчет произведен исходя из среднемесячной суммы <?= number_format($averageMonthlyTotal, 2, '.', ' ') ?> BYN
+                                                </td>
+                                            </tr>
+                                            <?php if ($totalPercent != 100): ?>
+                                            <!-- <tr>
+                                                <td colspan="3" class="text-danger small">
+                                                    Внимание: Сумма процентов составляет <?= $totalPercent ?>% (должно быть 100%)
+                                                </td>
+                                            </tr> -->
+                                            <?php endif; ?>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">Информация</h6>
+                                            <p class="mb-1"><strong>Среднемесячная сумма (100%):</strong> <?= number_format($averageMonthlyTotal, 2, '.', ' ') ?> BYN</p>
+                                            <p class="mb-1"><strong>Количество сотрудников:</strong> <?= count($salaryData) ?></p>
+                                            <p class="mb-1"><strong>Фонд оплаты труда (60%):</strong> <?= number_format($totalGross, 2, '.', ' ') ?> BYN</p>
+                                            <p class="mb-1"><strong>Сумма чистыми (на руки):</strong> <?= number_format($totalCleanSum, 2, '.', ' ') ?> BYN</p>
+                                            <p class="mb-1"><strong>Отчисления (34%):</strong> <?= number_format($totalDeductions, 2, '.', ' ') ?> BYN</p>
+                                            <p class="mb-0"><strong>Прибыль компании (40%):</strong> <?= number_format($averageMonthlyTotal - $totalGross, 2, '.', ' ') ?> BYN</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            <!-- </div> -->
+                        </div>
                     </div>
                 </div>
             </div>
 
 
 
-            <div class="col-lg-4">
-            <div class="card h-100">
+
+
+        </div>
+
+        <div class="row g-4 mt-2">
+            <!-- Суммы по заказчикам -->
+            <div class="col-lg-8 d-flex">
+                <div class="card w-100">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Топ-20 заказчиков</h5>
+                        <h5 class="card-title mb-0">Суммы по заказчикам</h5>
+                    </div>
+                    <div class="card-body p-0" style="height: 100%;">
+                        <canvas id="customerChart" style="width: 100%; height: 100%; min-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="col-lg-4 d-flex">
+            <div class="card w-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Заказчики</h5>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive">
+                        <div class="table-responsive" style="max-height: 800px; overflow-y: auto;">
                             <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
@@ -255,7 +377,7 @@ try {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach (array_slice($customerTotals, 0, 30) as $customer): ?>
+                                    <?php foreach (array_slice($customerTotals, 0) as $customer): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($customer['customer']) ?></td>
                                         <td class="text-end"><?= number_format($customer['total'], 2, '.', ' ') ?></td>
@@ -269,51 +391,48 @@ try {
               </div>
             </div>
 
-        <div class="row g-4 mt-2">
-            <!-- Типы оборудования -->
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Типы оборудования</h5>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="modelChart" style="height: 800px;"></canvas>
-                    </div>
-                </div>
+<div class="row g-4 mt-2">
+    <!-- Типы оборудования (график) -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Типы оборудования</h5>
             </div>
-
-                     <div class="col-lg-4">
-                <!-- Детальная статистика -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Типы оборудования</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Модель</th>
-                                        <th class="text-end">Количество</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($objectStats['by_model'] as $model): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($model['model'] ?: 'Не указано') ?></td>
-                                        <td class="text-end"><?= $model['count'] ?></td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                </div>
-
+            <div class="card-body" style="height: 800px;">
+                <canvas id="modelChart" style="width: 100%; height: 100%;"></canvas>
             </div>
         </div>
+    </div>
+
+    <!-- Детальная статистика (таблица) -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Типы оборудования</h5>
+            </div>
+            <div class="card-body p-0" style="height: 800px;">
+                <div class="table-responsive" style="height: 100%; overflow-y: auto;">
+                    <table class="table table-hover mb-0">
+                        <thead class="sticky-top bg-white" style="top: 0; z-index: 1;">
+                            <tr>
+                                <th>Модель</th>
+                                <th class="text-end">Количество</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($objectStats['by_model'] as $model): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($model['model'] ?: 'Не указано') ?></td>
+                                <td class="text-end"><?= $model['count'] ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     </div>
     
     <!-- Данные для графиков -->

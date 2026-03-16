@@ -251,19 +251,19 @@ input[type="number"] {
 
 @media (max-width: 992px) {
 
-    #problemTable th:nth-child(3),
-    #problemTable td:nth-child(3) {
-        display: none;
-    }
-}
-
-@media (max-width: 768px) {
-
     #problemTable th:nth-child(4),
     #problemTable td:nth-child(4) {
         display: none;
     }
 }
+
+/* @media (max-width: 768px) {
+
+    #problemTable th:nth-child(3),
+    #problemTable td:nth-child(3) {
+        display: none;
+    }
+} */
 
 @keyframes slideIn {
     from {
