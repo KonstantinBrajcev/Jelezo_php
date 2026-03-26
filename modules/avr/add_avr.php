@@ -77,9 +77,9 @@ try {
         </div>
         
 
-        <div class="mb-3" style="height: 0px;">
-            <button type="button" class="btn btn-success" style="position: relative; top: -25px;
-                left: 10px; display: flex; justify-self: end;" id="add-work-btn">
+        <div class="mb-3" style="height: 10px;">
+            <button type="button" class="btn btn-success" style="position: relative; top: -20px;
+                left: 8px; display: flex; justify-self: end;" id="add-work-btn">
                 <i class="fas fa-plus" style="height: 25px; align-content: center;"></i>
             </button>
         </div>

@@ -47,10 +47,10 @@ try {
             <!-- Сюда будут динамически добавляться работы -->
         </div>
         
-        <div class="mb-3" style="height: 0px;">
-            <button type="button" class="btn btn-success" style="position: relative; top: -25px;
-                left: 10px; display: flex; justify-self: end;" id="add-work-btn" id="edit-add-work-btn">
-                <i class="fas fa-plus" style="height: 25px; align-content: center;"></i>
+        <div class="mb-3" style="height: 10px;">
+            <button type="button" class="btn btn-success" style="position: relative; top: -20px;
+                left: 8px; display: flex; justify-self: end;" id="edit-add-work-btn">
+                <i class="fas fa-plus" style="height: 22px; align-content: center; z-index: 10;"></i>
             </button>
         </div>
         
@@ -110,7 +110,7 @@ function addEditWorkBlock(index, workData = null) {
         <div class="work-item mb-2 p-1 border rounded" data-work-index="${index}">
             <div class="mb-2" style="height: 0px;">
                 <button type="button" class="btn btn-danger remove-work" style="display: block; 
-                position: relative; justify-self: end; right: -15px; top: -15px; z-index: 1;">
+                position: relative; justify-self: end; right: -10px; top: -10px; z-index: 1;">
                 &times;</button>
             </div>
             
