@@ -54,6 +54,13 @@
     <?php endif; ?>
 
 
+    <!-- СТРАНИЦА АВР -->
+    <?php if ($currentPage == '/avr.php'): ?>
+        <link rel="stylesheet" href="/assets/css/avr_styles.css">
+        <!-- Общий стиль модалок -->
+        <link rel="stylesheet" href="/assets/css/modal-styles.css">
+    <?php endif; ?>
+
 
     <!-- В header.php добавьте: -->
     <?php if ($currentPage == '/charts.php'): ?>
