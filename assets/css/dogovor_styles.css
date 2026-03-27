@@ -96,9 +96,9 @@ table {
     background-color: rgba(0, 0, 0, .075);
 }
 
-.modal-body {
+/* .modal-body {
     padding: 5px 10px;
-}
+} */
 
 thead {
     text-align-last: center;
@@ -155,13 +155,13 @@ tr:hover {
     font-size: 14px;
 }
 
-.modal-lg {
+/* .modal-lg {
     max-width: 800px;
 }
 
 .modal-lg-top {
     max-width: 850px;
-}
+} */
 
 .modal-footer {
     border: none;

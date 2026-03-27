@@ -72,19 +72,17 @@ try {
                 <!-- КНОПКА ДОБАВЛЕНИЯ - без data-bs-toggle, с onclick -->
                 <button type="button" class="btn btn-primary" onclick="openAddModal()">
                     <i class="fas fa-plus"></i>
-                    Добавить ремонт
                 </button>
 
                 <button type="button" class="btn btn-secondary" onclick="printTable()">
                     <i class="fas fa-print"></i>
-                    Печать
                 </button>
             </div>
 
             <table id="avrTable">
                 <thead>
                     <tr>
-                        <!-- <th>ID</th> -->
+                        <th>ID</th>
                         <th>Дата</th>
                         <th style="width: 300px;">Объект</th>
                         <th>Проблема</th>
@@ -105,14 +103,14 @@ try {
                     <?php else: ?>
                         <?php foreach ($avr_records as $record): ?>
                             <tr>
-                                <!-- <td><?= htmlspecialchars($record['id']) ?></td> -->
+                                <td><?= htmlspecialchars($record['id']) ?></td>
                                 <td><?= date('d.m.Y', strtotime($record['insert_date'])) ?></td>
                                 <td>
                                     <?php 
                                     if (!empty($record['object_customer'])) {
-                                        $object_display = htmlspecialchars($record['object_customer']);
+                                        $object_display = '<strong>' . htmlspecialchars($record['object_customer']) . '</strong>';
                                         $object_display .= '<br>' . htmlspecialchars($record['object_address'] ?? 'адрес не указан') . '';
-                                        // $object_display .= ' [ID:' . htmlspecialchars($record['object_id']) . ']';
+                                        // $object_display .= ' [ID:' . htmlspecialchars($record['id']) . ']';
                                         echo $object_display;
                                     } else {
                                         echo htmlspecialchars($record['object_id'] ?? 'Не указан');
@@ -146,11 +144,11 @@ try {
                                             title="Редактировать">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button onclick="confirmDelete(<?= $record['id'] ?>)" 
+                                    <!-- <button onclick="confirmDelete(<?= $record['id'] ?>)" 
                                             class="btn btn-sm btn-danger" 
                                             title="Удалить">
                                         <i class="fas fa-trash"></i>
-                                    </button>
+                                    </button> -->
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -163,68 +161,22 @@ try {
     </div>
 </div>
 
-<!-- Модальное окно добавления записи - БЕЗ классов Bootstrap, как в dogovor.php -->
+<!-- Модальное окно добавления записи -->
 <div id="addAvrModal" class="modal" style="display: none;">
     <div class="modal-content">
         <?php include __DIR__ . '/add_avr.php'; ?>
     </div>
 </div>
 
-<!-- Модальное окно редактирования записи - БЕЗ классов Bootstrap, как в dogovor.php -->
+<!-- Модальное окно редактирования записи -->
 <div id="editAvrModal" class="modal" style="display: none;">
     <div class="modal-content">
         <?php include __DIR__ . '/edit_avr.php'; ?>
     </div>
 </div>
 
-<style>
-.status-warning {
-    color: #ffc107;
-    font-weight: bold;
-}
-.status-warning i {
-    color: #ffc107;
-}
-.actions-column {
-    white-space: nowrap;
-    width: 100px;
-}
-.actions-column .btn {
-    margin: 0 2px;
-}
-</style>
 
 <script>
-// Функции для открытия/закрытия модальных окон (как в dogovor.php)
-function openAddModal() {
-    document.getElementById('addAvrModal').style.display = 'block';
-}
-
-function closeAddModal() {
-    document.getElementById('addAvrModal').style.display = 'none';
-}
-
-function openEditModal() {
-    document.getElementById('editAvrModal').style.display = 'block';
-}
-
-function closeEditModal() {
-    document.getElementById('editAvrModal').style.display = 'none';
-}
-
-// Закрытие при клике на фон
-window.onclick = function(event) {
-    const addModal = document.getElementById('addAvrModal');
-    const editModal = document.getElementById('editAvrModal');
-    
-    if (event.target === addModal) {
-        addModal.style.display = 'none';
-    }
-    if (event.target === editModal) {
-        editModal.style.display = 'none';
-    }
-}
-
 $(document).ready(function() {
     // Открытие модального окна редактирования
     $('.edit-avr').click(function() {
@@ -408,6 +360,7 @@ function confirmDelete(id) {
     }
 }
 
+
 // Функция печати
 function printTable() {
     const tableHTML = document.getElementById('avrTable').outerHTML;
@@ -458,6 +411,36 @@ function printTable() {
     }, 1000);
 }
 
+// Функции для открытия/закрытия модальных окон
+function openAddModal() {
+    document.getElementById('addAvrModal').style.display = 'block';
+}
+
+function closeAddModal() {
+    document.getElementById('addAvrModal').style.display = 'none';
+}
+
+function openEditModal() {
+    document.getElementById('editAvrModal').style.display = 'block';
+}
+
+function closeEditModal() {
+    document.getElementById('editAvrModal').style.display = 'none';
+}
+
+// Закрытие при клике на фон
+window.onclick = function(event) {
+    const addModal = document.getElementById('addAvrModal');
+    const editModal = document.getElementById('editAvrModal');
+    
+    if (event.target === addModal) {
+        addModal.style.display = 'none';
+    }
+    if (event.target === editModal) {
+        editModal.style.display = 'none';
+    }
+}
+
 // Автоматическое скрытие алертов через 5 секунд
 setTimeout(function() {
     const alerts = document.querySelectorAll('.alert');
@@ -468,5 +451,7 @@ setTimeout(function() {
     });
 }, 5000);
 </script>
+
+
 </body>
 </html>
