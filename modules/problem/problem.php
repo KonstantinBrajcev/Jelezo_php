@@ -161,18 +161,25 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
                     <i class="fas fa-table"></i>
                 </a>
 
+
                 <!-- ТОЛЬКО ДЛЯ АДМИНОВ -->
                 <?php if ($isSuperAdmin): ?>
-                <a href="/dogovor.php" class="map-button">
-                    <span class="button-text">Договора</span>
-                    <i class="fas fa-file-alt"></i>
-                </a>
+                    <a href="/dogovor.php" class="map-button">
+                        <span class="button-text">Договора</span>
+                        <i class="fas fa-file-alt"></i>
+                    </a>
 
-                <a href="/charts.php" class="map-button">
-                    <span class="button-text">Графики</span>
-                    <i class="fas fa-chart-line"></i>
-                </a>
+                    <a href="/charts.php" class="map-button">
+                        <span class="button-text">Графики</span>
+                        <i class="fas fa-chart-line"></i>
+                    </a>
+
+                    <a href="avr.php" class="map-button">
+                        <span class="button-text">АВР</span>
+                        <i class="fa-solid fa-gear"></i>
+                    </a>
                 <?php endif; ?>
+
 
                 <button class="btn btn-primary" onclick="openAddModal()">
                     <i class="fas fa-plus"></i>
@@ -187,7 +194,7 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
                 <tr>
                     <!-- <th>ID</th> -->
                     <th>Название</th>
-                    <th>Создано</th>
+                    <th>Дата</th>
                     <th></th>
                     <!-- <th>User</th> -->
                     <th></th>
@@ -198,10 +205,16 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
                 <?php foreach ($problems as $problem): ?>
                 <tr class="<?php if ($problem['is_completed'] == 2) echo 'deleted';
                                 else if ($problem['is_completed'] == 1) echo 'completed'; 
-                                ?>" id="row-<?= $problem['id'] ?>">
+                                ?>" id="row-<?= $problem['id'] ?>"
+                                class="btn edit-btn" onclick="openEditModal(<?= $problem['id'] ?>)">
+
                     <!-- <td><?= $problem['id'] ?></td> -->
+
                     <td style="text-align: left;"><?= htmlspecialchars($problem['name']) ?></td>
-                    <td><?= $problem['created_date'] ?></td>
+
+                    <!-- <td><?= $problem['created_date'] ?></td> -->
+                    <td><?= date('d.m.Y', strtotime($problem['created_date'])) ?></td>
+
                     <td  style="text-align: right;">
                         <form method="POST" style="display: inline;" onsubmit="return toggleComplete(event, this)">
                             <input type="hidden" name="action" value="toggle_complete">
@@ -211,6 +224,7 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
                             </button>
                         </form>
                     </td>
+
                     <!-- <td><?= $problem['user_id'] ?: '—' ?></td> -->
 
                     <td style="width: 70px;">
@@ -253,14 +267,14 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
 
 
 
-                    <td class="actions">
+                    <!--<td class="actions">
                         <button class="btn edit-btn" onclick="openEditModal(<?= $problem['id'] ?>)">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <!-- <button class="btn btn-danger" onclick="deleteProblem(<?= $problem['id'] ?>)">
+                         <button class="btn btn-danger" onclick="deleteProblem(<?= $problem['id'] ?>)">
                             <i class="fas fa-trash"></i>
-                        </button> -->
-                    </td>
+                        </button> 
+                    </td>-->
                 </tr>
                 <?php endforeach; ?>
             </tbody>

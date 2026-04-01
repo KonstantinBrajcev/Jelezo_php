@@ -134,7 +134,7 @@ th:hover {
     background-color: #45a049;
 }
 
-th.sort-asc::after {
+/* th.sort-asc::after {
     content: " ▲";
     font-size: 12px;
 }
@@ -142,7 +142,7 @@ th.sort-asc::after {
 th.sort-desc::after {
     content: " ▼";
     font-size: 12px;
-}
+} */
 
 tr:nth-child(even) {
     background-color: #f9f9f9;
@@ -177,29 +177,28 @@ tr:hover {
 }
 
 /* Адаптивная таблица с постепенным скрытием колонок */
-@media (max-width: 1200px) {
-
-    /* ИСЧЕЗАЕТ КОЛОНКА СРОК */
-    #avrTable th:nth-child(5),
-    #avrTable td:nth-child(5) {
-        display: none;
-    }
-}
-
-@media (max-width: 992px) {
+@media (max-width: 1000px) {
 
     /* ИСЧЕЗАЕТ КОЛОНКА СТАТУС */
-    #avrTable th:nth-child(6),
-    #avrTable td:nth-child(6) {
+    #avrTable th:nth-child(4),
+    #avrTable td:nth-child(4) {
         display: none;
     }
 }
 
-@media (max-width: 768px) {
+/* ИСЧЕЗАЕТ КОЛОНКА СТАТУС */
+/* @media (max-width: 850px) {
+    #avrTable th:nth-child(3),
+    #avrTable td:nth-child(3) {
+        display: none;
+    }
+} */
+
+@media (max-width: 680px) {
 
     /* ИСЧЕЗАЕТ КОЛОНКА ДАТА */
-    #avrTable th:nth-child(2),
-    #avrTable td:nth-child(2) {
+    #avrTable th:nth-child(3),
+    #avrTable td:nth-child(3) {
         display: none;
     }
 
@@ -208,7 +207,7 @@ tr:hover {
     } */
 }
 
-@media (max-width: 576px) {
+/* @media (max-width: 576px) {
 
     #avrTable th:nth-child(1),
     #avrTable td:nth-child(1) {
@@ -219,4 +218,4 @@ tr:hover {
         display: block;
     }
 
-}
+} */

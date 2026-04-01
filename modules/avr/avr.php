@@ -64,6 +64,11 @@ try {
                     <i class="fas fa-list"></i>
                 </a>
 
+                <a href="/dogovor.php" class="map-button">
+                    <span class="button-text">Договора</span>
+                    <i class="fas fa-file-alt"></i>
+                </a>
+
                 <a href="/charts.php" class="map-button">
                     <span class="button-text">Графики</span>
                     <i class="fas fa-chart-line"></i>
@@ -82,11 +87,11 @@ try {
             <table id="avrTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Дата</th>
-                        <th style="width: 300px;">Объект</th>
+                        <!-- <th>ID</th> -->
+                        <th>Дата/ID</th>
+                        <th style="min-width: 300px;">Объект</th>
                         <th>Проблема</th>
-                        <th>Работ</th>
+                        <!-- <th>Работ</th> -->
                         <!-- <th>Работа</th> -->
                         <!-- <th>Кол-во</th> -->
                         <!-- <th>Ед. изм.</th> -->
@@ -102,54 +107,51 @@ try {
                         </tr>
                     <?php else: ?>
                         <?php foreach ($avr_records as $record): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($record['id']) ?></td>
-                                <td><?= date('d.m.Y', strtotime($record['insert_date'])) ?></td>
+                            <tr class="edit-avr" data-id="<?= $record['id'] ?>">
+
+                                <td><strong><?= htmlspecialchars($record['id']) ?></strong><br>
+                                <?= date('d.m.Y', strtotime($record['insert_date'])) ?>
+                                </td>
+
                                 <td>
                                     <?php 
-                                    if (!empty($record['object_customer'])) {
                                         $object_display = '<strong>' . htmlspecialchars($record['object_customer']) . '</strong>';
                                         $object_display .= '<br>' . htmlspecialchars($record['object_address'] ?? 'адрес не указан') . '';
-                                        // $object_display .= ' [ID:' . htmlspecialchars($record['id']) . ']';
                                         echo $object_display;
-                                    } else {
-                                        echo htmlspecialchars($record['object_id'] ?? 'Не указан');
-                                    }
                                     ?>
                                 </td>
 
-                                <td><?= htmlspecialchars($record['problem']) ?></td>
-                                <td class="text-center">
-                                    <?php $works_count = $record['works_count'] ?? 0;
-                                        if ($works_count > 0) {
-                                            echo '<span class="badge bg-info">' . $works_count . '</span>';
-                                        } else {
-                                            echo '<span class="badge bg-secondary">0</span>';
-                                        }
-                                    ?>
+                                <td>
+                                    <span class="badge bg-info"><?= htmlspecialchars($record['works_count'] ?? '-') ?></span>
+                                    <br>
+                                    <?= htmlspecialchars($record['problem']) ?>
                                 </td>
+
                                 <!-- <td><?= htmlspecialchars($record['work_name'] ?? 'Не указана') ?></td> -->
                                 <!-- <td><?= htmlspecialchars($record['quantity'] ?? '-') ?></td> -->
                                 <!-- <td><?= htmlspecialchars($record['unit'] ?? '-') ?></td> -->
                                 <!-- <td><?= htmlspecialchars($record['user_id']) ?></td> -->
+
                                 <td>
                                     <span class="<?= $record['result'] === 'Выполнено' ? 'status-active' : ($record['result'] === 'В работе' ? 'status-warning' : 'status-inactive') ?>">
                                         <?= htmlspecialchars($record['result'] ?? 'Не указан') ?>
                                     </span>
                                 </td>
-                                <td class="actions-column">
-                                    <button type="button" 
+
+                                <!-- <td class="actions-column">
+                                        <button type="button" 
                                             class="btn btn-sm btn-warning edit-avr" 
                                             data-id="<?= $record['id'] ?>"
                                             title="Редактировать">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <!-- <button onclick="confirmDelete(<?= $record['id'] ?>)" 
+                                    <button onclick="confirmDelete(<?= $record['id'] ?>)" 
                                             class="btn btn-sm btn-danger" 
                                             title="Удалить">
                                         <i class="fas fa-trash"></i>
-                                    </button> -->
-                                </td>
+                                    </button>
+                                </td> -->
+
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

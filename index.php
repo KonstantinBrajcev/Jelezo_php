@@ -114,23 +114,33 @@ try {
                     <i class="fas fa-list"></i>
                 </a>
 
+
+
                 <!-- ТОЛЬКО ДЛЯ АДМИНОВ -->
                 <?php if ($isSuperAdmin): ?>
-                <a href="dogovor.php" class="map-button">
-                    <span class="button-text">Договора</span>
-                    <i class="fas fa-file"></i>
-                </a>
 
-                <a href="charts.php" class="map-button">
-                    <span class="button-text">Графики</span>
-                <i class="fas fa-chart-line"></i>
-                </a>
+                    <a href="dogovor.php" class="map-button">
+                        <span class="button-text">Договора</span>
+                        <i class="fas fa-file"></i>
+                    </a>
 
-                <button type="button" class="btn btn-primary" onclick="openAddModal()">
-                    <i class="fas fa-plus"></i>
-                    <!-- Добавление -->
-                </button>
+                    <a href="charts.php" class="map-button">
+                        <span class="button-text">Графики</span>
+                        <i class="fas fa-chart-line"></i>
+                    </a>
+
+                    <a href="avr.php" class="map-button">
+                        <span class="button-text">АВР</span>
+                        <i class="fa-solid fa-gear"></i>
+                    </a>
+
+                    <button type="button" class="btn btn-primary" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i><!-- Добавление -->
+                    </button>
+
                 <?php endif; ?>
+
+
 
                 <!-- Кнопка фильтра по цвету -->
                 <div class="filter-dropdown">
@@ -221,7 +231,8 @@ try {
                 ?>
 
                 <!-- Строка Таблицы Обьектов -->
-                <tr data-id="<?php echo htmlspecialchars($objectId); ?>" style="<?php echo $rowClass; ?>">
+                <tr onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)"
+                data-id="<?php echo htmlspecialchars($objectId); ?>" style="<?php echo $rowClass; ?>">
 
                     <!-- Колонка ЗАКАЗЧИК -->
                     <td><?php echo htmlspecialchars($row['customer'] ?? ''); ?></td>
@@ -262,10 +273,10 @@ try {
                     <!-- Колонка с Действиями -->
                     <td class="actions-column">
 
-                        <!-- Кнопка Редактирования -->
+                        <!-- Кнопка Редактирования
                         <button class="edit-btn" onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
                             <i class="fas fa-edit"></i>
-                        </button>
+                        </button> -->
 
                         <!-- Кнопка обслуживания -->
                         <button class="service-btn" onclick="openServiceModal(<?php echo htmlspecialchars($objectId); ?>, '<?php echo htmlspecialchars($row['customer'] ?? ''); ?>', '<?php echo htmlspecialchars($row['address'] ?? ''); ?>')"

@@ -53,12 +53,15 @@ try {
                     <i class="fas fa-list"></i>
                 </a>
 
-
                 <a href="/charts.php" class="map-button">
                     <span class="button-text">Графики</span>
-                <i class="fas fa-chart-line"></i>
+                    <i class="fas fa-chart-line"></i>
                 </a>
 
+                <a href="avr.php" class="map-button">
+                    <span class="button-text">АВР</span>
+                    <i class="fa-solid fa-gear"></i>
+                </a>
 
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDogovorModal">
                     <i class="fas fa-plus"></i>
@@ -94,7 +97,7 @@ try {
                             </tr>
                         <?php else: ?>
                             <?php foreach ($dogovors as $dogovor): ?>
-                                <tr>
+                                <tr class="edit-dogovor"  data-id="<?= $dogovor['id'] ?>">
                                     <!-- <td><?= htmlspecialchars($dogovor['id']) ?></td> -->
                                     <td><strong><?= htmlspecialchars($dogovor['number']) ?></strong></td>
                                     <td><?= htmlspecialchars($dogovor['customer']) ?></td>
