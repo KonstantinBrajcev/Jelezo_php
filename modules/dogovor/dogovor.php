@@ -84,9 +84,9 @@ try {
                             <!-- <th>Срок (лет)</th> -->
                             <th>Дата</th>
                             <th>Срок</th>
-                            <!-- <th>Создан</th> -->
-                            <!-- <th>Обновлен</th> -->
-                            <th>Статус</th>
+                            <!-- <th>Создан</th>
+                            <th>Обновлен</th>
+                            <th>Статус</th> -->
                             <th></th>
                         </tr>
                     </thead>
@@ -123,19 +123,19 @@ try {
                                             <?= $dogovor['financing'] !== 'Бюджет' ? 'Собств.' : 'Бюджет' ?>
                                         </span>
                                     </td>
-                                    <td class="actions-column">
+                                    <!-- <td class="actions-column">
                                         <button type="button" 
                                                 class="btn btn-sm btn-warning edit-dogovor" 
                                                 data-id="<?= $dogovor['id'] ?>"
                                                 title="Редактировать">
                                             <i class="fas fa-edit"></i>
-                                        </button>
+                                        </button> 
                                         <button onclick="confirmDelete(<?= $dogovor['id'] ?>)" 
                                                 class="btn btn-sm btn-danger" 
                                                 title="Удалить">
                                             <i class="fas fa-trash"></i>
                                         </button>
-                                    </td>
+                                    </td>-->
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
