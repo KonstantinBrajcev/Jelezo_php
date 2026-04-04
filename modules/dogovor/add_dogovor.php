@@ -6,7 +6,7 @@ $financingOptions = [
     'Бюджет' => 'Бюджет'
 ];
 ?>
-<form id="addDogovorForm" method="POST" action="/../../modules/dogovor/add_dogovor_ajax.php">
+<form id="addDogovorForm" method="POST" action="/modules/dogovor/add_dogovor_ajax.php">
     <div class="modal-header">
         <h5 class="modal-title" id="addDogovorModalLabel">Добавление договора</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -150,66 +150,3 @@ $financingOptions = [
 
 
 
-<script>
-// Добавляем обработчик успешного сохранения для отображения привязанных объектов
-$(document).ready(function() {
-    $('#addDogovorForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        // Ваш существующий код отправки формы...
-        
-        // После успешного сохранения, если в ответе есть id договора
-        // и привязанные объекты, можно их отобразить
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: new FormData(this),
-            processData: false,
-            contentType: false,
-            dataType: 'json',
-            success: function(response) {
-                if (response.success && response.dogovor_id) {
-                    // Загружаем объекты для этого договора
-                    loadObjectsForAdd(response.dogovor_id);
-                }
-            }
-        });
-    });
-    
-    // Функция загрузки объектов для отображения
-    function loadObjectsForAdd(dogovorId) {
-        $.ajax({
-            url: '/../../modules/admin/get_objects_by_dogovor.php',
-            type: 'GET',
-            data: { dogovor_id: dogovorId },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success && response.objects && response.objects.length > 0) {
-                    // Обновляем счетчик
-                    $('#objectsCountAdd').text(response.objects.length);
-                    
-                    // Скрываем сообщение "нет объектов"
-                    $('#noObjectsAdd').addClass('d-none');
-                    
-                    // Показываем таблицу
-                    $('#objectsTableAdd').removeClass('d-none');
-                    
-                    // Очищаем и заполняем таблицу
-                    const tbody = $('#objectsListAdd');
-                    tbody.empty();
-                    
-                    response.objects.forEach(function(obj) {
-                        tbody.append(`
-                            <tr>
-                                <td>${obj.id}</td>
-                                <td>${obj.name || 'Без названия'}</td>
-                                <td>${obj.address || 'Адрес не указан'}</td>
-                            </tr>
-                        `);
-                    });
-                }
-            }
-        });
-    }
-});
-</script>

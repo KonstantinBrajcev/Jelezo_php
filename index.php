@@ -231,52 +231,46 @@ try {
                 ?>
 
                 <!-- Строка Таблицы Обьектов -->
-                <tr onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)"
-                data-id="<?php echo htmlspecialchars($objectId); ?>" style="<?php echo $rowClass; ?>">
+                <tr data-id="<?php echo htmlspecialchars($objectId); ?>" style="<?php echo $rowClass; ?>">
 
                     <!-- Колонка ЗАКАЗЧИК -->
-                    <td><?php echo htmlspecialchars($row['customer'] ?? ''); ?></td>
+                    <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                        <?php echo htmlspecialchars($row['customer'] ?? ''); ?>
+                    </td>
 
                     <!-- Колонка АДРЕС -->
                     <td>
-                        <?php if (!empty($row['address'])): ?>
-                            <?php $encodedAddress = urlencode($row['address']); ?>
-                                <a href="https://yandex.ru/maps/?text=<?php echo $encodedAddress; ?>" 
-                                target="_blank" class="address-link">
+                            <!-- <?php $encodedAddress = urlencode($row['address']); ?> -->
+                                <a style="z-index: 1000;" href="https://yandex.ru/maps/?text=<?php echo $encodedAddress; ?>" 
+                                    target="_blank" class="address-link">
                                     <?php echo htmlspecialchars($row['address']); ?>
                                 </a>
-                        <?php else: ?>
-                            <span class="no-address">нет адреса</span>
-                        <?php endif; ?>
                     </td>
 
                     <!-- Колонка МОДЕЛЬ -->
-                    <td style="text-wrap-mode: nowrap;"><?php echo htmlspecialchars($row['model'] ?? ''); ?></td>
+                    <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)"
+                        style="text-wrap-mode: nowrap;"><?php echo htmlspecialchars($row['model'] ?? ''); ?>
+                    </td>
 
                     <!-- Колонка ТЕЛЕФОН -->
                     <td>
-                        <?php if (!empty($row['phone'])): ?>
-                            <?php 
-                            $phone = preg_replace('/[^0-9]/', '', $row['phone']);
-                            ?>
+                        <!-- <?php if (!empty($row['phone'])): ?> -->
+                            <?php $phone = preg_replace('/[^0-9]/', '', $row['phone']);?>
                             <a href="tel:+<?php echo $phone; ?>" class="phone-link">
                                 <?php echo htmlspecialchars($row['phone']); ?>
                             </a>
-                        <?php else: ?>
+                        <!-- <?php else: ?>
                             <span class="no-phone">нет телефона</span>
-                        <?php endif; ?>
+                        <?php endif; ?> -->
                     </td>
 
                     <!-- Колонка ИМЯ -->
-                    <td><?php echo htmlspecialchars($row['name'] ?? ''); ?></td>
+                    <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                        <?php echo htmlspecialchars($row['name'] ?? ''); ?>
+                    </td>
 
                     <!-- Колонка с Действиями -->
                     <td class="actions-column">
-
-                        <!-- Кнопка Редактирования
-                        <button class="edit-btn" onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
-                            <i class="fas fa-edit"></i>
-                        </button> -->
 
                         <!-- Кнопка обслуживания -->
                         <button class="service-btn" onclick="openServiceModal(<?php echo htmlspecialchars($objectId); ?>, '<?php echo htmlspecialchars($row['customer'] ?? ''); ?>', '<?php echo htmlspecialchars($row['address'] ?? ''); ?>')"

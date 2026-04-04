@@ -3,7 +3,7 @@
 <div id="addModal" class="modal" onclick="if(event.target===this) closeAddModal()">
     <div class="modal-content">
         <div class="modal-header">
-            <div class="modal-title">Добавление нового объекта</div>
+            <div class="modal-title">Добавление объекта</div>
             <button class="close-modal" onclick="closeAddModal()">&times;</button>
         </div>
         
@@ -90,7 +90,7 @@
 <!-- КОНЕЦ Модального окна добавления --->
 
 <script>
-// add-modal.js
+
 let addModal = document.getElementById('addModal');
 let addForm = document.getElementById('addForm');
 
@@ -98,7 +98,7 @@ let addForm = document.getElementById('addForm');
 function openAddModal() {
     if (addModal) {
         addModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Запрещаем прокрутку страницы
+        document.body.style.overflow = 'hidden';
     }
 }
 
@@ -106,9 +106,9 @@ function openAddModal() {
 function closeAddModal() {
     if (addModal) {
         addModal.style.display = 'none';
-        document.body.style.overflow = ''; // Возвращаем прокрутку
+        document.body.style.overflow = '';
         if (addForm) {
-            addForm.reset(); // Очищаем форму
+            addForm.reset();
         }
     }
 }
@@ -130,13 +130,26 @@ if (addForm) {
         showLoading(true);
         
         try {
-            const response = await fetch('add_object.php', {
+            const response = await fetch('/../../modules/service/add_object.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(data)
             });
+            
+            // Проверяем статус ответа
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Проверяем Content-Type ответа
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Получен не JSON ответ:', text.substring(0, 200));
+                throw new Error('Сервер вернул не JSON ответ');
+            }
             
             const result = await response.json();
             
@@ -152,11 +165,35 @@ if (addForm) {
             }
         } catch (error) {
             console.error('Error:', error);
-            showMessage('Ошибка при добавлении записи', 'error');
+            showMessage('Ошибка при добавлении записи: ' + error.message, 'error');
         } finally {
             showLoading(false);
         }
     });
+}
+
+// Функция показа сообщений (добавьте, если нет)
+function showMessage(message, type = 'info') {
+    // Создаем временное уведомление
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+        color: white;
+        border-radius: 4px;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
 
 // Функция показа/скрытия индикатора загрузки

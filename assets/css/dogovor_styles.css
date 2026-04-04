@@ -49,10 +49,6 @@ table {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* .controls {
-    margin: 10px 0;
-} */
-
 .user-info {
     display: flex;
     justify-content: space-between;
@@ -95,10 +91,6 @@ table {
 .table-hover tbody tr:hover {
     background-color: rgba(0, 0, 0, .075);
 }
-
-/* .modal-body {
-    padding: 5px 10px;
-} */
 
 thead {
     text-align-last: center;
@@ -145,7 +137,6 @@ tr:hover {
 .actions-column {
     text-align: center;
     text-wrap-mode: nowrap;
-    /* min-width: 180px; */
     width: 5%;
 }
 
@@ -154,14 +145,6 @@ tr:hover {
     color: #666;
     font-size: 14px;
 }
-
-/* .modal-lg {
-    max-width: 800px;
-}
-
-.modal-lg-top {
-    max-width: 850px;
-} */
 
 .modal-footer {
     border: none;

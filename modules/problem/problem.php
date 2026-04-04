@@ -290,7 +290,7 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
 
 
             <div class="modal-header">
-                <h5>Добавление проблемы</h5>
+                <h5><strong>Добавление проблемы</strong></h5>
                 <span class="close" onclick="closeAddModal()">&times;</span>
             </div>
 
@@ -336,7 +336,7 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5>Редактировать проблему</h5>
+                <h5><strong>Редактировать проблему</strong></h5>
                 <span class="close" onclick="closeEditModal()">&times;</span>
             </div>
 

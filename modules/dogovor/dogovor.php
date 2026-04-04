@@ -282,6 +282,7 @@ try {
                 const form = $(this);
                 const submitBtn = form.find('button[type="submit"]');
                 const spinner = submitBtn.find('.spinner-border');
+                const originalBtnText = submitBtn.html();
                 
                 // Показываем спиннер и блокируем кнопку
                 spinner.removeClass('d-none');
@@ -317,11 +318,15 @@ try {
                     contentType: false,
                     dataType: 'json',
                     success: function(response) {
+                        console.log('Ответ сервера:', response);
                         if (response.success) {
-                            console.log('Ответ сервера:', response); // Добавьте эту строку
                             // Показываем сообщение об успехе
                             $('#addSuccessAlert').removeClass('d-none').text(response.message);
                             
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('addDogovorModal'));
+                            if (modal) {
+                                modal.hide();
+                            }
                             // Очищаем форму
                             form[0].reset();
                             $('#date').val('<?= date("Y-m-d") ?>');
