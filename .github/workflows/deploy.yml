@@ -10,7 +10,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
     - name: Copy files via SCP
       uses: appleboy/scp-action@v0.1.7
@@ -23,6 +23,9 @@ jobs:
         target: "www/jelezo.by"
         strip_components: 0
         rm: true  # Удалять старые файлы
+        timeout: "60s"
+        command_timeout: "10m"
+        debug: true
     
     - name: Set permissions
       uses: appleboy/ssh-action@v1.0.0
