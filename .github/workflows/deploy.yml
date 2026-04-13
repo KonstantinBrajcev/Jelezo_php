@@ -1,62 +1,25 @@
-name: 🚀 Deploy to Server via FTP
+name: Deploy to Server
 
 on:
   push:
     branches: [main, master]
-  # Возможность запустить вручную из интерфейса GitHub
-  workflow_dispatch:
 
 jobs:
   deploy:
-    name: 📤 Upload files to hosting
     runs-on: ubuntu-latest
     
     steps:
-      # 1. Скачиваем код из репозитория
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
       
-      # 2. Загружаем файлы через FTP
-      - name: 📂 FTP Deploy
+      - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
-          # Данные для подключения (используем секреты)
           server: ${{ secrets.FTP_HOST }}
-          port: ${{ secrets.FTP_PORT }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          
-          # Пути
-          local-dir: ./                    # Что загружаем (все файлы)
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}  # Куда загружаем
-          
-          # Настройки протокола
-          protocol: ftp                    # Используем обычный FTP
-          security: insecure              # Без шифрования (для FTP)
-          
-          # Какие файлы НЕ загружать
-          exclude: |
-            .git*
-            .git/**/*
-            .github/**/*
-            .vscode/**/*
-            node_modules/**/*
-            *.log
-            .env
-            .env.*
-            .deploy-*
-            .DS_Store
-            Thumbs.db
-          
-          # Уровень детализации логов
-          log-level: verbose               # Подробный лог для отладки
-          
-          # Дополнительные настройки FTP
-          ftp-options: |
-            -e "set ftp:passive-mode true"          # Пассивный режим (важно!)
-            -e "set ftp:prefer-epsv false"          # Отключаем EPSV
-            -e "set ftp:auto-passive-mode false"    # Ручное управление пассивным режимом
-            -e "set net:timeout 60"                 # Таймаут 60 секунд
-            -e "set net:max-retries 3"              # Максимум попыток
-            -e "set net:persist-retries 1"          # Пауза между попытками
-            -e "set mirror:parallel-transfer-count 1" # Один файл за раз (стабильнее)
+          local-dir: ./
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          protocol: ftp
+          security: loose
+          exclude: .git*,.github*,node_modules*,*.log,.env
