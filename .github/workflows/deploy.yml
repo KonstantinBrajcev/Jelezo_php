@@ -23,19 +23,9 @@ jobs:
           protocol: ftp
           security: loose
           exclude: |
-            .git
             .git/
-            .git/**
             .github/
-            .github/**
-            node_modules/
-            node_modules/**
             *.log
-            .env
-            .env.*
-            .deploy-*
-            .DS_Store
-            Thumbs.db
             README.md
             *.sqlite3
           log-level: verbose
