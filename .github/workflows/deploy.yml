@@ -1,40 +1,35 @@
-name: Deploy to Server
+name: 🚀 Deploy via FTP
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
-  deploy:
+  ftp-deploy:
+    name: 📂 Upload to server via FTP
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Copy files via SCP
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SERVER_PORT }}
-        source: "."
-        target: "www/jelezo.by"
-        strip_components: 0
-        rm: true  # Удалять старые файлы
-        timeout: "60s"
-        command_timeout: "10m"
-        debug: true
-    
-    - name: Set permissions
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SERVER_PORT }}
-        script: |
-          cd www/jelezo.by
-          chmod -R 755 assets/uploads 2>/dev/null || true
-          echo "✅ Deployed at $(date)" > deployment.log
+      - name: ⬇️ Get latest code
+        uses: actions/checkout@v4  # Используем v4 вместо v3
+        
+      - name: 📤 Upload files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          port: ${{ secrets.FTP_PORT }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./  # Корень вашего репозитория
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          exclude: |
+            **/.git*
+            **/.git*/** 
+            **/.github/**
+            **/node_modules/**
+            **/*.log
+            .env
+          log-level: standard  # Для отладки, потом можно сменить на minimal
+          # Если нужен FTPS (защищенный):
+          # protocol: ftps
+          # security: strict
