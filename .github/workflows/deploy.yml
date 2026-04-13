@@ -1,35 +1,38 @@
-name: 🚀 Deploy via FTP
+name: Deploy to Server
 
 on:
   push:
     branches: [main, master]
 
 jobs:
-  ftp-deploy:
-    name: 📂 Upload to server via FTP
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
-      - name: ⬇️ Get latest code
-        uses: actions/checkout@v4  # Используем v4 вместо v3
-        
-      - name: 📤 Upload files via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          port: ${{ secrets.FTP_PORT }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./  # Корень вашего репозитория
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          exclude: |
-            **/.git*
-            **/.git*/** 
-            **/.github/**
-            **/node_modules/**
-            **/*.log
-            .env
-          log-level: standard  # Для отладки, потом можно сменить на minimal
-          # Если нужен FTPS (защищенный):
-          # protocol: ftps
-          # security: strict
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Upload via SFTP (stable)
+      uses: milanmk/actions-file-deployer@master
+      with:
+        remote-protocol: "sftp"
+        remote-host: ${{ secrets.SERVER_HOST }}
+        remote-user: ${{ secrets.SSH_USERNAME }}
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        remote-port: ${{ secrets.SERVER_PORT }}
+        local-path: "./"
+        remote-path: "www/jelezo.by"
+        sync: "full"
+        debug: "true"
+    
+    - name: Set permissions
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SERVER_PORT }}
+        script: |
+          cd www/jelezo.by
+          chmod -R 755 assets/uploads 2>/dev/null || true
+          echo "✅ Deployed at $(date)" > deployment.log
