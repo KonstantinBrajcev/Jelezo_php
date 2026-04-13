@@ -23,8 +23,11 @@ jobs:
           protocol: ftp
           security: loose
           exclude: |
+            .git
             .git/
+            .git/**
             .github/
+            .github/**
             *.log
             README.md
             *.sqlite3
