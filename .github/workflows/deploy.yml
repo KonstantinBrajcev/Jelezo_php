@@ -1,38 +1,62 @@
-name: Deploy to Server
+name: 🚀 Deploy to Server via FTP
 
 on:
   push:
     branches: [main, master]
+  # Возможность запустить вручную из интерфейса GitHub
+  workflow_dispatch:
 
 jobs:
   deploy:
+    name: 📤 Upload files to hosting
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Upload via SFTP (stable)
-      uses: milanmk/actions-file-deployer@master
-      with:
-        remote-protocol: "sftp"
-        remote-host: ${{ secrets.SERVER_HOST }}
-        remote-user: ${{ secrets.SSH_USERNAME }}
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        remote-port: ${{ secrets.SERVER_PORT }}
-        local-path: "./"
-        remote-path: "www/jelezo.by"
-        sync: "full"
-        debug: "true"
-    
-    - name: Set permissions
-      uses: appleboy/ssh-action@v1.1.0
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SERVER_PORT }}
-        script: |
-          cd www/jelezo.by
-          chmod -R 755 assets/uploads 2>/dev/null || true
-          echo "✅ Deployed at $(date)" > deployment.log
+      # 1. Скачиваем код из репозитория
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      # 2. Загружаем файлы через FTP
+      - name: 📂 FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          # Данные для подключения (используем секреты)
+          server: ${{ secrets.FTP_HOST }}
+          port: ${{ secrets.FTP_PORT }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          
+          # Пути
+          local-dir: ./                    # Что загружаем (все файлы)
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}  # Куда загружаем
+          
+          # Настройки протокола
+          protocol: ftp                    # Используем обычный FTP
+          security: insecure              # Без шифрования (для FTP)
+          
+          # Какие файлы НЕ загружать
+          exclude: |
+            .git*
+            .git/**/*
+            .github/**/*
+            .vscode/**/*
+            node_modules/**/*
+            *.log
+            .env
+            .env.*
+            .deploy-*
+            .DS_Store
+            Thumbs.db
+          
+          # Уровень детализации логов
+          log-level: verbose               # Подробный лог для отладки
+          
+          # Дополнительные настройки FTP
+          ftp-options: |
+            -e "set ftp:passive-mode true"          # Пассивный режим (важно!)
+            -e "set ftp:prefer-epsv false"          # Отключаем EPSV
+            -e "set ftp:auto-passive-mode false"    # Ручное управление пассивным режимом
+            -e "set net:timeout 60"                 # Таймаут 60 секунд
+            -e "set net:max-retries 3"              # Максимум попыток
+            -e "set net:persist-retries 1"          # Пауза между попытками
+            -e "set mirror:parallel-transfer-count 1" # Один файл за раз (стабильнее)
