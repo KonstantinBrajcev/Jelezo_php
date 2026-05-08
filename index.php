@@ -12,7 +12,15 @@ $databaseFile = __DIR__ . '/includes/db.sqlite3';
 // Определяем текущий месяц (1-12)
 $currentMonth = (int)date('n'); // n - номер месяца без ведущего нуля
 // Определяем название колонки для текущего месяца
-$monthColumn = 'M' . $currentMonth;
+// $monthColumn = 'M' . $currentMonth;
+
+
+// Получаем выбранный месяц из GET параметра или используем текущий
+$selectedMonth = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
+// Ограничиваем значение от 1 до 12
+$selectedMonth = max(1, min(12, $selectedMonth));
+
+$selectedMonthColumn = 'M' . $selectedMonth;
 
 try {
     // Создаем подключение через PDO
@@ -33,9 +41,9 @@ try {
     // Получаем только те записи, где в колонке текущего месяца есть цифра
     // ВЫБИРАЕМ ВСЕ СТОЛБЦЫ ДЛЯ РЕДАКТИРОВАНИЯ
     $sql = "SELECT * FROM LIFTEH_object 
-            WHERE $monthColumn IS NOT NULL 
-            AND $monthColumn != '' 
-            AND CAST($monthColumn AS TEXT) != '0'";
+            WHERE $selectedMonthColumn IS NOT NULL 
+            AND $selectedMonthColumn != '' 
+            AND CAST($selectedMonthColumn AS TEXT) != '0'";
 
     $stmt = $pdo->query($sql);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -52,6 +60,8 @@ $months = [
     10 => 'октябрь', 11 => 'ноябрь', 12 => 'декабрь'
 ];
 
+$selectedMonthName = $months[$selectedMonth] ?? 'неизвестный месяц';
+
 $currentMonthName = $months[$currentMonth] ?? 'неизвестный месяц';
 $idField = 'id'; // Получаем ID поля
 
@@ -59,27 +69,51 @@ $idField = 'id'; // Получаем ID поля
 // Получаем информацию о сервисах для каждого объекта
 $serviceInfo = [];
 try {
-    $serviceStmt = $pdo->query("SELECT 
-            s.object_id, s.last_service, s.service_count,
-            (SELECT result 
-             FROM LIFTEH_service 
-             WHERE object_id = s.object_id 
-                AND service_date = s.last_service 
-             ORDER BY id DESC 
-             LIMIT 1) as last_result,
-            strftime('%m', s.last_service) as last_service_month
-        FROM (SELECT object_id,
-                MAX(service_date) as last_service,
-                COUNT(*) as service_count
-            FROM LIFTEH_service 
-            GROUP BY object_id) s ");
+    // Получаем последний сервис ДО или В выбранном месяце
+    $lastDayOfMonth = date('Y-m-t', mktime(0, 0, 0, $selectedMonth, 1, date('Y')));
+    
+    // ИСПРАВЛЕННЫЙ ЗАПРОС - без вложенного MAX()
+    $serviceStmt = $pdo->prepare("
+        SELECT 
+            object_id,
+            service_date as last_service,
+            result as last_result,
+            COUNT(*) OVER (PARTITION BY object_id) as service_count,
+            strftime('%m', service_date) as last_service_month,
+            strftime('%Y', service_date) as last_service_year
+        FROM LIFTEH_service 
+        WHERE service_date <= :lastDayOfMonth
+        AND (object_id, service_date) IN (
+            SELECT object_id, MAX(service_date)
+            FROM LIFTEH_service
+            WHERE service_date <= :lastDayOfMonth2
+            GROUP BY object_id
+        )
+    ");
+    
+    $serviceStmt->execute([
+        ':lastDayOfMonth' => $lastDayOfMonth,
+        ':lastDayOfMonth2' => $lastDayOfMonth
+    ]);
     $serviceData = $serviceStmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($serviceData as $service) {
         $serviceInfo[$service['object_id']] = $service;
     }
+    
+    // Отладка
+    // echo '<div class="debug" style="background: #e3f2fd; padding: 10px; margin: 10px; font-size: 12px;">';
+    // echo 'Найдено объектов с сервисами: ' . count($serviceInfo) . '<br>';
+    // if (count($serviceInfo) > 0) {
+        // $first = reset($serviceInfo);
+        // echo 'Пример: object_id=' . key($serviceInfo) . ', дата=' . $first['last_service'] . ', результат=' . $first['last_result'];
+    // }
+    // echo '</div>';
+    
 } catch (Exception $e) {
-    // Не прерываем выполнение, если таблица сервисов не существует
+    // echo '<div class="error" style="background: #ffd5d5; padding: 10px; margin: 10px;">';
+    // echo 'Ошибка получения сервисов: ' . $e->getMessage();
+    // echo '</div>';
 }
 ?>
 
@@ -99,6 +133,24 @@ try {
 
 
     <div class="container">
+
+
+        <!-- Селектор месяца -->
+        <div class="month-selector">
+            <label for="monthSelect" class="month-label">
+                <i class="fas fa-calendar-alt"></i> Месяц:
+            </label>
+            <select id="monthSelect" class="month-select">
+                <?php foreach ($months as $num => $name): ?>
+                    <option value="<?php echo $num; ?>" <?php echo $selectedMonth == $num ? 'selected' : ''; ?>>
+                        <?php echo $name; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <span class="month-hint">(состояние на последний день месяца)</span>
+        </div>
+
+        
 
         <!-- Верхняя панель с кнопками -->
         <div class="controls">
@@ -169,11 +221,26 @@ try {
                 </div>
 
 
+
+
+
             </div>
         </div>
 
         <div class="info">
             <!-- Будет информация о текущем месяце -->
+            <div class="current-display-info">
+                <i class="fas fa-chart-line"></i>
+                Отображено состояние объектов на 
+                <strong><?php echo $selectedMonthName; ?></strong> 
+                <?php echo date('Y'); ?> года
+                <?php if ($selectedMonth != (int)date('n')): ?>
+                    <span class="warning-badge">
+                        <i class="fas fa-info-circle"></i> 
+                        (не текущий месяц)
+                    </span>
+                <?php endif; ?>
+            </div> 
         </div>
 
         <div id="message" class="message">
@@ -186,6 +253,18 @@ try {
         </div>
 
         <?php if (count($rows) > 0): ?>
+
+<!-- Временная отладка - удалите после проверки -->
+<!-- <div style="background: #f0f0f0; padding: 10px; margin: 10px; font-size: 12px;">
+    <strong>Отладка:</strong><br>
+    Выбранный месяц: <?php echo $selectedMonth; ?> (<?php echo $selectedMonthColumn; ?>)<br>
+    Количество записей: <?php echo count($rows); ?><br>
+    Количество сервисов: <?php echo count($serviceInfo); ?><br>
+    <?php if (!empty($serviceInfo)): ?>
+        Пример сервиса: <?php echo htmlspecialchars(print_r(array_slice($serviceInfo, 0, 1, true), true)); ?>
+    <?php endif; ?>
+</div> -->
+
         <table id="sortableTable">
             <thead> <!--- HEAD таблицы --->
                 <tr>
@@ -207,26 +286,46 @@ try {
                 $serviceCount = $hasServices ? $serviceInfo[$objectId]['service_count'] : 0;
                 $lastResult = $hasServices ? $serviceInfo[$objectId]['last_result'] : null;
                 $lastServiceMonth = $hasServices ? (int)$serviceInfo[$objectId]['last_service_month'] : null;
+
+                $lastServiceYear = $hasServices ? $serviceInfo[$objectId]['last_service_year'] : null;
+                $currentYear = date('Y');
                 
                 // Определяем класс для цвета строки
                 $rowClass = '';
-                
-                // Проверяем, было ли ТО в текущем месяце И есть результат
-                if ($hasServices && 
-                    $lastServiceMonth !== null && 
-                    $lastResult !== null && 
-                    $lastServiceMonth == $currentMonth) {
+
+                // Получаем значение из колонки выбранного месяца (статус объекта)
+                $monthStatus = $row[$selectedMonthColumn] ?? null;
+                            
+                // Приоритет 1: Если есть проблемы в выбранном месяце (красный)
+                if ($monthStatus == 2 || $monthStatus === '2') {
+                    $rowClass = 'background-color: #ffd5d5 !important;'; // Красный - проблемы
+                } 
+                // Приоритет 2: Если объект не работает в выбранном месяце (красный)
+                elseif ($monthStatus == 0 || $monthStatus === '0') {
+                    $rowClass = 'background-color: #ffd5d5 !important;'; // Красный - не работает
+                }
+                // Приоритет 3: Если было ТО в выбранном месяце и результат плохой
+                elseif ($hasServices && 
+                        $lastServiceMonth !== null && 
+                        $lastResult !== null && 
+                        $lastServiceMonth == $selectedMonth &&
+                        $lastServiceYear == $currentYear) {
                     switch ($lastResult) {
                         case '0':
-                            $rowClass = 'background-color: #d4edda !important;';
+                            $rowClass = 'background-color: #d4edda !important;'; // Зеленый - успешное ТО
                             break;
                         case '1':
-                            $rowClass = 'background-color: #fffed9 !important;';
+                            $rowClass = 'background-color: #fffed9 !important;'; // Желтый - есть замечания
                             break;
                         case '2':
-                            $rowClass = 'background-color: #ffd5d5 !important;';
+                            $rowClass = 'background-color: #ffd5d5 !important;'; // Красный - серьезные проблемы
                             break;
                     }
+                }
+                // Приоритет 4: Проверяем статус из колонки месяца (если не учтен выше)
+                elseif ($monthStatus == 1 || $monthStatus === '1') {
+                    // Обычный статус без ТО - оставляем без цвета или желтый
+                    // Можно добавить дополнительную логику
                 }
                 ?>
 
@@ -294,7 +393,7 @@ try {
 
         <?php else: ?>
             <div class="empty">
-                <p>В таблице нет записей с данными в колонке <?php echo $monthColumn; ?> (<?php echo $currentMonthName; ?>)</p>
+                <p>В таблице нет записей с данными в колонке <?php echo $selectedMonthColumn; ?> (<?php echo $currentMonthName; ?>)</p>
                 <p>Или проверьте правильность названия таблицы и колонок</p>
             </div>
         <?php endif; ?>
@@ -535,6 +634,24 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             applyColorFilter(savedFilter);
         }, 100);
+    }
+});
+</script>
+
+
+<script>
+// Обработчик изменения месяца
+document.addEventListener('DOMContentLoaded', function() {
+    const monthSelect = document.getElementById('monthSelect');
+    if (monthSelect) {
+        monthSelect.addEventListener('change', function() {
+            const selectedMonth = this.value;
+            // Получаем текущий URL и обновляем параметр month
+            const url = new URL(window.location.href);
+            url.searchParams.set('month', selectedMonth);
+            // Перезагружаем страницу с новым параметром
+            window.location.href = url.toString();
+        });
     }
 });
 </script>
