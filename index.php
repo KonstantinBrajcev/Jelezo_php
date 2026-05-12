@@ -135,20 +135,7 @@ try {
     <div class="container">
 
 
-        <!-- Селектор месяца -->
-        <div class="month-selector">
-            <label for="monthSelect" class="month-label">
-                <i class="fas fa-calendar-alt"></i> Месяц:
-            </label>
-            <select id="monthSelect" class="month-select">
-                <?php foreach ($months as $num => $name): ?>
-                    <option value="<?php echo $num; ?>" <?php echo $selectedMonth == $num ? 'selected' : ''; ?>>
-                        <?php echo $name; ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <span class="month-hint">(состояние на последний день месяца)</span>
-        </div>
+
 
         
 
@@ -227,21 +214,32 @@ try {
             </div>
         </div>
 
-        <div class="info">
-            <!-- Будет информация о текущем месяце -->
-            <div class="current-display-info">
-                <i class="fas fa-chart-line"></i>
-                Отображено состояние объектов на 
-                <strong><?php echo $selectedMonthName; ?></strong> 
-                <?php echo date('Y'); ?> года
+
+
+        <!-- Селектор месяца -->
+        <div class="month-selector">
+            <label for="monthSelect" class="month-label">
+                <i class="fas fa-calendar-alt"></i> Месяц:
+            </label>
+            <select id="monthSelect" class="month-select">
+                <?php foreach ($months as $num => $name): ?>
+                    <option value="<?php echo $num; ?>" <?php echo $selectedMonth == $num ? 'selected' : ''; ?>>
+                        <?php echo $name; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <!-- <span class="month-hint">(состояние на последний день месяца)</span> -->
+            Отображено состояние объектов на 
+                <strong><?php echo $selectedMonthName, ' ' , date('Y'); ?></strong> года
                 <?php if ($selectedMonth != (int)date('n')): ?>
-                    <span class="warning-badge">
+                    <span class="warning-badge" style="font-weight: bold; color: red;">
                         <i class="fas fa-info-circle"></i> 
                         (не текущий месяц)
                     </span>
+                    <span class="month-hint">(состояние на последний день месяца)</span>
                 <?php endif; ?>
-            </div> 
         </div>
+
 
         <div id="message" class="message">
             <!-- Тут будут сообщения -->

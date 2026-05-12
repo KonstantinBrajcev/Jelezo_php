@@ -72,7 +72,8 @@ function generateBalloonTemplate(obj, coordinates, phoneLink) {
   };
 }
 
-// Простая функция для открытия обслуживания
+
+// функция для открытия обслуживания
 function openServiceFromMap(objectId) {
   // Ищем объект в глобальном массиве objectsData из map.php
   if (typeof objectsData !== 'undefined') {

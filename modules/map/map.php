@@ -116,7 +116,8 @@ foreach ($objects as $obj) {
         // Проверяем, что это числа
         if (is_numeric($lat) && is_numeric($lng)) {
             $mapData[] = [
-                'id' => $obj['id'] ?? null,
+                // 'id' => $obj['id'] ?? null,
+                'id' => (int)$obj['id'],
                 'customer' => $obj['customer'] ?? '',
                 'address' => $obj['address'] ?? '',
                 'model' => $obj['model'] ?? '',
@@ -145,41 +146,6 @@ if ($mapDataJson === false) {
 <!DOCTYPE html>
 <html lang="ru">
 <?php $pageTitle = 'Карта объектов'; include __DIR__ . '/../../includes/header.php'; ?>
-<style>
-    /* Стили для сообщений на карте */
-.map-message {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 12px 24px;
-    border-radius: 4px;
-    color: white;
-    font-size: 14px;
-    z-index: 10000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    animation: slideIn 0.3s ease;
-    max-width: 300px;
-}
-
-.map-message.success {
-    background-color: #4CAF50;
-}
-
-.map-message.error {
-    background-color: #f44336;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-</style>
 <body>
 
     <?php include __DIR__ . '/../../modules/service/service-modal.php'; ?>
