@@ -136,7 +136,122 @@ function displayServiceHistory(data) {
   historyDiv.innerHTML = html;
 }
 
+
+// ========== НОВАЯ ФУНКЦИЯ: Обновление цвета строки ==========
+function updateRowColor(objectId, serviceResult, serviceDate) {
+  const row = document.querySelector(`tr[data-id="${objectId}"]`);
+  if (!row) {
+    console.log('Строка не найдена для objectId:', objectId);
+    return;
+  }
+  
+  // Получаем выбранный месяц из селектора
+  const monthSelect = document.getElementById('monthSelect');
+  let selectedMonth = new Date().getMonth() + 1; // текущий месяц по умолчанию
+  
+  if (monthSelect) {
+    selectedMonth = parseInt(monthSelect.value);
+  }
+  
+  // Получаем месяц из даты ТО
+  let serviceMonth = null;
+  let serviceYear = null;
+  
+  if (serviceDate) {
+    const serviceDateObj = new Date(serviceDate);
+    if (!isNaN(serviceDateObj.getTime())) {
+      serviceMonth = serviceDateObj.getMonth() + 1;
+      serviceYear = serviceDateObj.getFullYear();
+    }
+  }
+  
+  const currentYear = new Date().getFullYear();
+  
+  // Проверяем, относится ли ТО к выбранному месяцу и текущему году
+  const isServiceInSelectedMonth = (serviceMonth === selectedMonth && serviceYear === currentYear);
+  
+  let newStyle = '';
+  
+  // Только если ТО было в выбранном месяце, меняем цвет
+  if (isServiceInSelectedMonth) {
+    if (serviceResult == 2) {
+      newStyle = 'background-color: #ffd5d5 !important;'; // Красный - не работает
+    } else if (serviceResult == 1) {
+      newStyle = 'background-color: #fffed9 !important;'; // Желтый - есть замечания
+    } else if (serviceResult == 0) {
+      newStyle = 'background-color: #d4edda !important;'; // Зеленый - исправен
+    }
+  } else {
+    console.log('ТО не в выбранном месяце, цвет не меняется. Месяц ТО:', serviceMonth, 'Выбранный месяц:', selectedMonth);
+  }
+  
+  // Применяем новый стиль
+  if (newStyle) {
+    row.setAttribute('style', newStyle);
+    console.log('Цвет строки обновлен:', newStyle);
+  }
+  
+  // Если активен фильтр по цвету, переприменяем его
+  if (typeof window.currentFilter !== 'undefined' && window.currentFilter && window.currentFilter !== 'all') {
+    if (typeof filterTableByColor === 'function') {
+      filterTableByColor(window.currentFilter);
+    }
+  }
+}
+
+
 // Добавление записи о ТО
+// function addServiceRecord() {
+//   const form = document.getElementById('serviceForm');
+//   const formData = new FormData(form);
+
+//   // Добавляем дополнительные данные
+//   formData.append('user_id', 1);
+
+//   // Получаем дату и преобразуем
+//   const dateInput = document.getElementById('serviceDate');
+//   if (dateInput.value) {
+//     const formattedDate = dateInput.value.replace('T', ' ') + ':00';
+//     formData.set('service_date', formattedDate);
+//   }
+
+//   // Показываем индикатор загрузки
+//   const loadingDiv = document.getElementById('loading');
+//   if (loadingDiv) loadingDiv.style.display = 'block';
+//   hideMessage();
+
+//   // Отправка данных
+//   fetch('/modules/service/add_service.php', {
+//     method: 'POST',
+//     body: formData
+//   })
+//     .then(response => response.json())
+//     .then(result => {
+//       if (loadingDiv) loadingDiv.style.display = 'none';
+
+//       if (result.success) {
+//         showMessage('Запись о ТО успешно добавлена!', 'success');
+//         // Сначала обновляем историю в модальном окне
+//         loadServiceHistory(currentServiceObjectId);
+//         // Затем обновляем кнопку и счетчик
+//         updateServiceButton(currentServiceObjectId).then(() => {
+//           // И только после обновления кнопки закрываем модальное окно
+//           setTimeout(() => {
+//             closeServiceModal();
+//           }, 500); // Даем время увидеть обновленную историю
+//         });
+//       } else {
+//         showMessage('Ошибка: ' + (result.error || 'Неизвестная ошибка'), 'error');
+//       }
+//     })
+//     .catch(error => {
+//       if (loadingDiv) loadingDiv.style.display = 'none';
+//       showMessage('Ошибка сети: ' + error.message, 'error');
+//     });
+// }
+
+
+// ========== ИЗМЕНЕННАЯ ФУНКЦИЯ: Добавление записи о ТО ==========
 function addServiceRecord() {
   const form = document.getElementById('serviceForm');
   const formData = new FormData(form);
@@ -146,10 +261,14 @@ function addServiceRecord() {
 
   // Получаем дату и преобразуем
   const dateInput = document.getElementById('serviceDate');
+  let serviceDateFormatted = null;
   if (dateInput.value) {
-    const formattedDate = dateInput.value.replace('T', ' ') + ':00';
-    formData.set('service_date', formattedDate);
+    serviceDateFormatted = dateInput.value.replace('T', ' ') + ':00';
+    formData.set('service_date', serviceDateFormatted);
   }
+
+  // Получаем результат ТО до отправки
+  const serviceResult = parseInt(document.getElementById('serviceResult').value);
 
   // Показываем индикатор загрузки
   const loadingDiv = document.getElementById('loading');
@@ -167,14 +286,19 @@ function addServiceRecord() {
 
       if (result.success) {
         showMessage('Запись о ТО успешно добавлена!', 'success');
+        
         // Сначала обновляем историю в модальном окне
         loadServiceHistory(currentServiceObjectId);
+        
         // Затем обновляем кнопку и счетчик
         updateServiceButton(currentServiceObjectId).then(() => {
-          // И только после обновления кнопки закрываем модальное окно
+          // ОБНОВЛЯЕМ ЦВЕТ СТРОКИ
+          updateRowColor(currentServiceObjectId, serviceResult, serviceDateFormatted || new Date().toISOString());
+          
+          // Закрываем модальное окно
           setTimeout(() => {
             closeServiceModal();
-          }, 500); // Даем время увидеть обновленную историю
+          }, 500);
         });
       } else {
         showMessage('Ошибка: ' + (result.error || 'Неизвестная ошибка'), 'error');
@@ -185,6 +309,7 @@ function addServiceRecord() {
       showMessage('Ошибка сети: ' + error.message, 'error');
     });
 }
+
 
 // Обновление кнопки ТО в таблице
 function updateServiceButton(objectId) {

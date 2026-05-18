@@ -20,6 +20,11 @@ if (!$data) {
     sendJsonResponse(['success' => false, 'error' => 'Неверный формат данных']);
 }
 
+function getNullIfEmpty($data, $key) {
+    $value = $data[$key] ?? null;
+    return ($value === '' || $value === null) ? null : (string)$value;
+}
+
 try {
     $pdo = new PDO("sqlite:" . DB_PATH);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -46,15 +51,24 @@ try {
     $stmt->bindValue(':name', $data['name'] ?? '', PDO::PARAM_STR);
     
     // Месяцы
+    // for ($i = 1; $i <= 12; $i++) {
+    //     $stmt->bindValue(":M$i", $data["M$i"] ?? '', PDO::PARAM_STR);
+    // }
     for ($i = 1; $i <= 12; $i++) {
-        $stmt->bindValue(":M$i", $data["M$i"] ?? '', PDO::PARAM_STR);
+        $value = getNullIfEmpty($data, "M$i");
+        $stmt->bindValue(":M$i", $value, $value === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
     }
-    
+
     // Координаты и ID
-    $stmt->bindValue(':latitude', $data['latitude'] ?? '', PDO::PARAM_STR);
-    $stmt->bindValue(':longitude', $data['longitude'] ?? '', PDO::PARAM_STR);
-    $stmt->bindValue(':folder_id', $data['folder_id'] ?? '', PDO::PARAM_STR);
-    $stmt->bindValue(':dogovor_id', $data['dogovor_id'] ?? '', PDO::PARAM_STR);
+    // $stmt->bindValue(':latitude', $data['latitude'] ?? '', PDO::PARAM_STR);
+    // $stmt->bindValue(':longitude', $data['longitude'] ?? '', PDO::PARAM_STR);
+    // $stmt->bindValue(':folder_id', $data['folder_id'] ?? '', PDO::PARAM_STR);
+    // $stmt->bindValue(':dogovor_id', $data['dogovor_id'] ?? '', PDO::PARAM_STR);
+    $stmt->bindValue(':latitude', getNullIfEmpty($data, 'latitude'), PDO::PARAM_STR);
+    $stmt->bindValue(':longitude', getNullIfEmpty($data, 'longitude'), PDO::PARAM_STR);
+    $stmt->bindValue(':folder_id', getNullIfEmpty($data, 'folder_id'), PDO::PARAM_STR);
+    $stmt->bindValue(':dogovor_id', getNullIfEmpty($data, 'dogovor_id'), PDO::PARAM_STR);
+
     
     // Выполняем запрос
     if ($stmt->execute()) {
