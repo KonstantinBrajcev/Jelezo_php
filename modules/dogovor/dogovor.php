@@ -96,6 +96,7 @@ try {
     <?php $pageTitle = 'Учет договоров'; include __DIR__ . '/../../includes/header.php'; ?>
 <body>
 
+
 <?php include __DIR__ . '/../../modules/admin/user_panel.php'; ?>
 
     <div class="container">

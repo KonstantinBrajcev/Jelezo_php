@@ -334,13 +334,8 @@ try {
                 <!-- Строка Таблицы Обьектов -->
                 <tr data-id="<?php echo htmlspecialchars($objectId); ?>" style="<?php echo $rowClass; ?>">
 
-
                     <!-- Колонка ДОГОВОР -->
-                    <!-- <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
-                        <?php echo htmlspecialchars($row['dogovor_number'] ?? ''); ?>
-                    </td> -->
-                    <!-- Колонка ДОГОВОР -->
-                    <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                    <td style="text-align: center;" onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
                         <?php 
                         $dogovorNumber = $row['dogovor_number'] ?? '';
                         if (strlen($dogovorNumber) > 6) {

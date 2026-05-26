@@ -30,14 +30,16 @@
                 </div>
             </div>
             
-            <div class="form-group form-floating">
+            <div class="d-flex flex-nowrap gap-2">
+            <div class="form-group form-floating flex-fill">
                 <input type="text" class="form-control" id="addPhone" name="phone">
                 <label for="addPhone">Телефон:</label>
             </div>
             
-            <div class="form-group form-floating">
+            <div class="form-group form-floating flex-fill">
                 <input type="text" class="form-control" id="addName" name="name">
                 <label for="addName">Имя:</label>
+            </div>
             </div>
             
             <!-- <div class="form-group form-floating">
@@ -46,7 +48,7 @@
             </div> -->
             
             <!-- Поля для месяцев (M1-M12) -->
-            <div class="months-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+            <div class="months-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 8px;">
                 <?php for ($i = 1; $i <= 12; $i++): ?>
                 <div class="form-group form-floating">
                     <input type="text" class="form-control month-input" id="addM<?php echo $i; ?>" name="M<?php echo $i; ?>">
