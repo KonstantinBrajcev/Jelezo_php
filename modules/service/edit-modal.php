@@ -32,14 +32,16 @@
                 </div>
             </div>
             
-            <div class="form-group form-floating">
-                <input type="text" class="form-control" id="editPhone" name="phone">
-                <label for="editPhone">Телефон:</label>
-            </div>
-            
-            <div class="form-group form-floating">
-                <input type="text" class="form-control" id="editName" name="name">
-                <label for="editName">Имя:</label>
+            <div class="d-flex flex-nowrap gap-2">
+                <div class="form-group form-floating  flex-fill">
+                    <input type="text" class="form-control" id="editPhone" name="phone">
+                    <label for="editPhone">Телефон:</label>
+                </div>
+                
+                <div class="form-group form-floating  flex-fill">
+                    <input type="text" class="form-control" id="editName" name="name">
+                    <label for="editName">Имя:</label>
+                </div>
             </div>
             
             <!-- Добавляем поля для координат -->

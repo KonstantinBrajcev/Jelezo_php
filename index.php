@@ -40,7 +40,11 @@ try {
 
     // Получаем только те записи, где в колонке текущего месяца есть цифра
     // ВЫБИРАЕМ ВСЕ СТОЛБЦЫ ДЛЯ РЕДАКТИРОВАНИЯ
-    $sql = "SELECT * FROM LIFTEH_object 
+    $sql = "SELECT 
+            LIFTEH_object. *,
+            LIFTEH_dogovor.number as dogovor_number
+        FROM LIFTEH_object 
+        LEFT JOIN LIFTEH_dogovor ON LIFTEH_object.dogovor_id = LIFTEH_dogovor.id
             WHERE $selectedMonthColumn IS NOT NULL 
             AND $selectedMonthColumn != '' 
             AND CAST($selectedMonthColumn AS TEXT) != '0'";
@@ -266,6 +270,7 @@ try {
         <table id="sortableTable">
             <thead> <!--- HEAD таблицы --->
                 <tr>
+                    <th data-column="6" data-sort="none">№</th>
                     <th data-column="0" data-sort="none">Заказчик</th>
                     <th data-column="1" data-sort="none">Адрес</th>
                     <th data-column="2" data-sort="none">Модель</th>
@@ -329,6 +334,23 @@ try {
 
                 <!-- Строка Таблицы Обьектов -->
                 <tr data-id="<?php echo htmlspecialchars($objectId); ?>" style="<?php echo $rowClass; ?>">
+
+
+                    <!-- Колонка ДОГОВОР -->
+                    <!-- <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                        <?php echo htmlspecialchars($row['dogovor_number'] ?? ''); ?>
+                    </td> -->
+                    <!-- Колонка ДОГОВОР -->
+                    <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                        <?php 
+                        $dogovorNumber = $row['dogovor_number'] ?? '';
+                        if (strlen($dogovorNumber) > 6) {
+                            echo htmlspecialchars(substr($dogovorNumber, 0, 6) . '...');
+                        } else {
+                            echo htmlspecialchars($dogovorNumber);
+                        }
+                        ?>
+                    </td>
 
                     <!-- Колонка ЗАКАЗЧИК -->
                     <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
@@ -428,18 +450,18 @@ function updateTableRow(data) {
     const row = document.querySelector(`tr[data-id="${data.id}"]`);
     if (row) {
         // Обновляем ячейки
-        row.cells[0].textContent = data.customer || '';
-        row.cells[1].innerHTML = data.address ? 
+        row.cells[1].textContent = data.customer || '';
+        row.cells[2].innerHTML = data.address ? 
             `<a href="https://yandex.ru/maps/?text=${encodeURIComponent(data.address)}" target="_blank" class="address-link">${data.address}</a>` : 
             '<span class="no-address">нет адреса</span>';
-        row.cells[2].textContent = data.model || '';
+        row.cells[3].textContent = data.model || '';
         if (data.phone) {
             const cleanPhone = data.phone.replace(/\D/g, '');
-            row.cells[3].innerHTML = `<a href="tel:+${cleanPhone}" class="phone-link">${data.phone}</a>`;
+            row.cells[4].innerHTML = `<a href="tel:+${cleanPhone}" class="phone-link">${data.phone}</a>`;
         } else {
-            row.cells[3].innerHTML = '<span class="no-phone">нет телефона</span>';
+            row.cells[4].innerHTML = '<span class="no-phone">нет телефона</span>';
         }
-        row.cells[4].textContent = data.name || '';
+        row.cells[5].textContent = data.name || '';
 
         // Обновляем кнопку редактирования с новыми данными
         const editButton = row.querySelector('.edit-btn');
