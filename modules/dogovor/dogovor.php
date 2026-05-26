@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../modules/auth/auth.php';
 checkAuth(); // Проверяем авторизацию
-checkSuperuser(); // Только для суперпользователей
+checkSuperuser(); // Только для суперпользователей!
 // Получаем информацию о текущем пользователе
 $currentUser = getCurrentUser();
 
@@ -209,9 +209,9 @@ try {
                 </button>
 
                 <!-- КНОПКА ПЕЧАТИ -->
-                <!-- <button type="button" class="btn btn-secondary" onclick="printTable()">
+                <button type="button" class="btn btn-secondary" onclick="printTable()">
                     <i class="fas fa-print"></i>
-                </button> -->
+                </button>
               </div>
 
               <!-- Легенда цветов -->
@@ -665,65 +665,65 @@ try {
             });
         }, 5000);
 
-        // // Простая функция печати (без перезагрузки)
-        // function printTable() {
-        //     // Получаем HTML таблицы
-        //     const tableHTML = document.getElementById('dogovorTable').outerHTML;
-        //     // Создаем временный DOM элемент
-        //     const temp = document.createElement('div');
-        //     temp.innerHTML = tableHTML;
-        //     // Удаляем ненужные ячейки (последнюю колонку с кнопками)
-        //     const rows = temp.querySelectorAll('tr');
-        //     rows.forEach(row => {
-        //         const cells = row.querySelectorAll('th, td');
-        //         if (cells.length > 5) {
-        //             cells[5].remove();
-        //         }
-        //     });
+        // Простая функция печати (без перезагрузки)
+        function printTable() {
+            // Получаем HTML таблицы
+            const tableHTML = document.getElementById('dogovorTable').outerHTML;
+            // Создаем временный DOM элемент
+            const temp = document.createElement('div');
+            temp.innerHTML = tableHTML;
+            // Удаляем ненужные ячейки (последнюю колонку с кнопками)
+            const rows = temp.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('th, td');
+                if (cells.length > 5) {
+                    cells[5].remove();
+                }
+            });
             
-        //     // Создаем скрытый iframe для печати
-        //     const iframe = document.createElement('iframe');
-        //     iframe.style.position = 'absolute';
-        //     iframe.style.visibility = 'hidden';
+            // Создаем скрытый iframe для печати
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.visibility = 'hidden';
             
-        //     document.body.appendChild(iframe);
+            document.body.appendChild(iframe);
             
-        //     // Формируем содержимое для печати
-        //     const printDocument = iframe.contentWindow.document;
-        //     printDocument.open();
-        //     printDocument.write(`
-        //         <!DOCTYPE html>
-        //         <html>
-        //         <head>
-        //             <meta charset="UTF-8">
-        //            <style>
-        //                 .date, th {text-align: center;}
-        //                 table {width: 100%; border-collapse: collapse;}
-        //                 th, td {border: 1px solid #000; padding: 5px 5px;}
-        //                 #dogovorTable th:nth-child(5), #dogovorTable td:nth-child(5) {width: 50px; text-align: center;}
-        //                 #dogovorTable th:nth-child(1), #dogovorTable td:nth-child(1) {text-align: center;}
-        //                 .service-status-all {background-color: #d4edda !important;}
-        //                 .service-status-partial {background-color: #fff3cd !important;}
-        //             </style>
-        //         </head>
-        //         <body>
-        //             <h1 style="text-align: center;">Реестр договоров</h1>
-        //             ${temp.innerHTML}
-        //             <div class="count" style="margin-top: 20px; text-align: left; font-size: 14px; color: #666;">
-        //                 Всего записей: ${document.querySelectorAll('#dogovorTable tbody tr').length}
-        //             </div>
-        //         </body>
-        //         </html>
-        //     `);
-        //     printDocument.close();
-        //     // Печатаем
-        //     iframe.contentWindow.focus();
-        //     iframe.contentWindow.print();
-        //     // Удаляем iframe после печати
-        //     setTimeout(() => {
-        //         document.body.removeChild(iframe);
-        //     }, 1000);
-        // }
+            // Формируем содержимое для печати
+            const printDocument = iframe.contentWindow.document;
+            printDocument.open();
+            printDocument.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                   <style>
+                        .date, th {text-align: center;}
+                        table {width: 100%; border-collapse: collapse;}
+                        th, td {border: 1px solid #000; padding: 5px 5px;}
+                        #dogovorTable th:nth-child(5), #dogovorTable td:nth-child(5) {width: 50px; text-align: center;}
+                        #dogovorTable th:nth-child(1), #dogovorTable td:nth-child(1) {text-align: center;}
+                        .service-status-all {background-color: #d4edda !important;}
+                        .service-status-partial {background-color: #fff3cd !important;}
+                    </style>
+                </head>
+                <body>
+                    <h1 style="text-align: center;">Реестр договоров</h1>
+                    ${temp.innerHTML}
+                    <div class="count" style="margin-top: 20px; text-align: left; font-size: 14px; color: #666;">
+                        Всего записей: ${document.querySelectorAll('#dogovorTable tbody tr').length}
+                    </div>
+                </body>
+                </html>
+            `);
+            printDocument.close();
+            // Печатаем
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            // Удаляем iframe после печати
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        }
     </script>
 </body>
 </html>
