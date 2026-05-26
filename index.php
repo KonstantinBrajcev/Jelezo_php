@@ -668,6 +668,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+
+
+
+
+// Временный код для отладки - покажет реальную ширину экрана
+window.addEventListener('DOMContentLoaded', function() {
+    const width = window.innerWidth;
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const physicalPixels = Math.round(width * devicePixelRatio);
+    
+    console.log('CSS-ширина:', width + 'px');
+    console.log('Физических пикселей:', physicalPixels + 'px');
+    console.log('Device Pixel Ratio:', devicePixelRatio);
+    
+    // Создаем информационную панель
+    const info = document.createElement('div');
+    info.style.cssText = 'position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: white; padding: 8px; font-size: 12px; z-index: 9999; text-align: center; font-family: monospace;';
+    info.innerHTML = `
+        <strong>Отладка:</strong> CSS ширина: ${width}px | 
+        Физических пикселей: ${physicalPixels}px | 
+        DPR: ${devicePixelRatio} |
+        Устройство: ${/iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'iOS' : 'Другое'}
+    `;
+    document.body.appendChild(info);
+    
+    // Автоматически скрыть через 10 секунд (опционально)
+    setTimeout(() => {
+        info.style.opacity = '0';
+        setTimeout(() => info.remove(), 1000);
+    }, 10000);
+});
+
 </script>
 
 

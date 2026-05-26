@@ -483,7 +483,7 @@ tr:hover {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px) and (min-width: 577px) {
 
     #sortableTable th:nth-child(4),
     #sortableTable td:nth-child(4) {
