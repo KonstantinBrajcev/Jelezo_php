@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../modules/auth/auth.php';
 checkAuth(); // Проверяем авторизацию
-checkSuperuser(); // Только для суперпользователей!
+checkSuperuser(); // Только для суперпользователей
 // Получаем информацию о текущем пользователе
 $currentUser = getCurrentUser();
 
