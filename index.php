@@ -219,7 +219,6 @@ try {
         </div>
 
 
-
         <!-- Селектор месяца -->
         <div class="month-selector">
             <label for="monthSelect" class="month-label">

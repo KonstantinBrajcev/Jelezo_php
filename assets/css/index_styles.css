@@ -94,6 +94,36 @@ tr:hover {
     text-align: center;
 }
 
+.month-select {
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: white;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Стили для опций выпадающего списка */
+.month-select option {
+    border: 1px solid #dee2e6;
+    background-color: white;
+    color: #333;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+/* Стиль при наведении на опцию */
+.month-select option:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Стиль для выбранной опции */
+.month-select option:checked {
+    background-color: #007bff;
+    color: white;
+}
 
 /* Стили для ссылок-телефонов */
 .phone-link {
