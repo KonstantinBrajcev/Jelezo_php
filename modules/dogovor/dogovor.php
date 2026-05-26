@@ -7,15 +7,85 @@ checkSuperuser(); // Только для суперпользователей!
 // Получаем информацию о текущем пользователе
 $currentUser = getCurrentUser();
 
-
-
 try {
     $db = new PDO('sqlite:' . DB_PATH);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
     // Получаем данные из таблицы
-    $sql = "SELECT * FROM LIFTEH_dogovor ORDER BY CAST(number AS INTEGER)";
+    $sql = "SELECT * FROM LIFTEH_dogovor ORDER BY is_active DESC, CAST(number AS INTEGER)";
     $stmt = $db->query($sql);
     $dogovors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Получаем текущий месяц
+    $currentMonth = date('m');
+    $currentYear = date('Y');
+    $currentMonthFormatted = date('Y-m');
+    
+    // Для каждого договора определяем статус выполнения ТО
+    foreach ($dogovors as &$dogovor) {
+        $dogovorId = $dogovor['id'];
+        
+        // Получаем все объекты, привязанные к этому договору
+        $sqlObjects = "SELECT id FROM LIFTEH_object WHERE dogovor_id = :dogovor_id";
+        $stmtObjects = $db->prepare($sqlObjects);
+        $stmtObjects->execute([':dogovor_id' => $dogovorId]);
+        $objects = $stmtObjects->fetchAll(PDO::FETCH_ASSOC);
+        
+        $totalObjects = count($objects);
+        
+        if ($totalObjects === 0) {
+            // Нет привязанных объектов - без выделения
+            $dogovor['service_status'] = 'no_objects';
+            continue;
+        }
+        
+        $objectsWithService = 0;
+        
+        // Для каждого объекта проверяем, было ли ТО в текущем месяце
+        foreach ($objects as $object) {
+            $objectId = $object['id'];
+            
+            // Проверяем наличие записей обслуживания за текущий месяц
+            $sqlService = "SELECT COUNT(*) as service_count FROM LIFTEH_service 
+                          WHERE object_id = :object_id 
+                          AND strftime('%Y-%m', service_date) = :year_month";
+            $stmtService = $db->prepare($sqlService);
+            $stmtService->execute([
+                ':object_id' => $objectId,
+                ':year_month' => $currentMonthFormatted
+            ]);
+            $serviceResult = $stmtService->fetch(PDO::FETCH_ASSOC);
+            
+            if ($serviceResult['service_count'] > 0) {
+                $objectsWithService++;
+            }
+        }
+        
+        // Определяем статус выполнения ТО
+        if ($objectsWithService === $totalObjects) {
+            // На ВСЕХ объектах проведено ТО
+            $dogovor['service_status'] = 'all_done';
+        } elseif ($objectsWithService === 0) {
+            // НИ НА ОДНОМ объекте не проведено ТО - нет выделения
+            $dogovor['service_status'] = 'none_done';
+        } else {
+            // ТО проведено ТОЛЬКО НА НЕКОТОРЫХ объектах
+            $dogovor['service_status'] = 'partial_done';
+        }
+    }
+    
+    // Разделяем договоры на активные и неактивные
+    $activeDogovors = [];
+    $inactiveDogovors = [];
+    
+    foreach ($dogovors as $dogovor) {
+        if ($dogovor['is_active'] == 1) {
+            $activeDogovors[] = $dogovor;
+        } else {
+            $inactiveDogovors[] = $dogovor;
+        }
+    }
+    
 } catch (PDOException $e) {
     die("Ошибка подключения к базе данных: " . $e->getMessage());
 }
@@ -26,14 +96,86 @@ try {
     <?php $pageTitle = 'Учет договоров'; include __DIR__ . '/../../includes/header.php'; ?>
 <body>
 
+<style>
+/* Стили для цветового выделения строк */
+.service-status-all {
+    background-color: #d4edda !important; /* Зеленый - все работы выполнены */
+}
+
+.service-status-partial {
+    background-color: #fff3cd !important; /* Желтый - работы выполнены частично */
+}
+
+/* Стили для ховера (при наведении) */
+.service-status-all:hover {
+    background-color: #c3e6cb !important;
+}
+
+.service-status-partial:hover {
+    background-color: #ffeaa7 !important;
+}
+
+/* Стили для аккордеона */
+.accordion-row td {
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+}
+
+.accordion-row td:hover {
+    background-color: #e9ecef;
+}
+
+.accordion-row td i {
+    transition: transform 0.3s ease;
+    margin-right: 8px;
+}
+
+/* Стиль для неактивных строк */
+.inactive-row {
+    opacity: 0.85;
+}
+
+/* Легенда цветов */
+.status-legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+}
+
+.legend-color.green {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.legend-color.yellow {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+}
+</style>
 
 <?php include __DIR__ . '/../../modules/admin/user_panel.php'; ?>
-
 
     <div class="container">
         <div>
             <div class="controls">
-
 
             <!-- БЛОК С КНОПКАМИ -->
               <div class="button-group">
@@ -46,7 +188,6 @@ try {
                     <span class="button-text">Таблица</span>
                     <i class="fas fa-table"></i>
                 </a>
-
 
                 <a href="/problem.php" class="map-button">
                     <span class="button-text">Проблемы</span>
@@ -65,80 +206,128 @@ try {
 
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDogovorModal">
                     <i class="fas fa-plus"></i>
-                    <!-- Добавление -->
                 </button>
 
-                    <!-- КНОПКА ПЕЧАТИ -->
+                <!-- КНОПКА ПЕЧАТИ -->
                 <button type="button" class="btn btn-secondary" onclick="printTable()">
                     <i class="fas fa-print"></i>
                 </button>
               </div>
 
+              <!-- Легенда цветов -->
+              <div class="status-legend">
+                  <div class="legend-item">
+                      <div class="legend-color green"></div>
+                      <span>Все работы выполнены</span>
+                  </div>
+                  <div class="legend-item">
+                      <div class="legend-color yellow"></div>
+                      <span>Работы выполнены частично</span>
+                  </div>
+                  <div class="legend-item">
+                      <div style="width: 20px; height: 20px; border-radius: 3px; background-color: transparent; border: 1px solid #dee2e6;"></div>
+                      <span>Работы не выполнялись или нет объектов</span>
+                  </div>
+              </div>
+
                 <table id="dogovorTable">
                     <thead>
                         <tr>
-                            <!-- <th>ID</th> -->
                             <th>№</th>
                             <th>Клиент</th>
-                            <!-- <th>Финанс.</th> -->
-                            <!-- <th>Срок (лет)</th> -->
                             <th>Дата</th>
                             <th>Срок</th>
-                            <!-- <th>Создан</th>
-                            <th>Обновлен</th>
-                            <th>Статус</th> -->
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (empty($dogovors)): ?>
-                            <tr>
-                                <td colspan="10" class="text-center">Нет данных</td>
+                        <!-- Активные договоры -->
+                        <?php foreach ($activeDogovors as $dogovor): ?>
+                            <?php
+                            // Определяем CSS класс для строки в зависимости от статуса обслуживания
+                            $rowClass = '';
+                            if ($dogovor['service_status'] == 'all_done') {
+                                $rowClass = 'service-status-all';
+                            } elseif ($dogovor['service_status'] == 'partial_done') {
+                                $rowClass = 'service-status-partial';
+                            }
+                            // none_done и no_objects - без выделения
+                            ?>
+                            <tr class="edit-dogovor <?= $rowClass ?>" data-id="<?= $dogovor['id'] ?>">
+                                <td><strong><?= htmlspecialchars($dogovor['number']) ?></strong></td>
+                                <td><?= htmlspecialchars($dogovor['customer']) ?></td>
+                                <td><?= date('d.m.Y', strtotime($dogovor['date'])) ?></td>
+                                <td><?= date('d.m.Y', strtotime($dogovor['validate'])) ?></td>
+                                <td>
+                                    <span class="<?= $dogovor['is_active'] ? 'status-active' : 'status-inactive' ?>">
+                                        <i class="fas fa-<?= $dogovor['is_active'] ? 'check-circle' : 'times-circle' ?>"></i>
+                                        <?= $dogovor['is_active'] ? 'Актив.' : 'Нет' ?>
+                                    </span>
+
+                                    <span class="<?= $dogovor['prolong'] ? 'status-active' : 'status-inactive' ?>">
+                                        <i class="fas fa-<?= $dogovor['prolong'] ? 'check-circle' : 'times-circle' ?>"></i>
+                                        <?= $dogovor['prolong'] ? 'Лонг.' : 'Без' ?>
+                                    </span>
+
+                                    <span class="<?= $dogovor['financing'] !== 'Бюджет' ? 'status-active' : 'status-inactive' ?>">
+                                        <i class="fas fa-<?= $dogovor['financing'] !== 'Бюджет' ? 'check-circle' : 'times-circle' ?>"></i>
+                                        <?= $dogovor['financing'] !== 'Бюджет' ? 'Собств.' : 'Бюджет' ?>
+                                    </span>
+                                </td>
                             </tr>
-                        <?php else: ?>
-                            <?php foreach ($dogovors as $dogovor): ?>
-                                <tr class="edit-dogovor"  data-id="<?= $dogovor['id'] ?>">
-                                    <!-- <td><?= htmlspecialchars($dogovor['id']) ?></td> -->
-                                    <td><strong><?= htmlspecialchars($dogovor['number']) ?></strong></td>
-                                    <td><?= htmlspecialchars($dogovor['customer']) ?></td>
-                                    <!-- <td><?= htmlspecialchars($dogovor['financing']) ?></td> -->
-                                    <!-- <td><?= htmlspecialchars($dogovor['prolong']) ?></td> -->
-                                    <td><?= date('d.m.Y', strtotime($dogovor['date'])) ?></td>
-                                    <td><?= date('d.m.Y', strtotime($dogovor['validate'])) ?></td>
-                                    <!-- <td><?= date('d.m.Y H:i', strtotime($dogovor['created_at'])) ?></td> -->
-                                    <!-- <td><?= date('d.m.Y H:i', strtotime($dogovor['updated_at'])) ?></td> -->
-                                    <td>
-                                        <span class="<?= $dogovor['is_active'] ? 'status-active' : 'status-inactive' ?>">
-                                            <i class="fas fa-<?= $dogovor['is_active'] ? 'check-circle' : 'times-circle' ?>"></i>
-                                            <?= $dogovor['is_active'] ? 'Актив.' : 'Нет' ?>
-                                        </span>
-
-                                        <span class="<?= $dogovor['prolong'] ? 'status-active' : 'status-inactive' ?>">
-                                            <i class="fas fa-<?= $dogovor['prolong'] ? 'check-circle' : 'times-circle' ?>"></i>
-                                            <?= $dogovor['prolong'] ? 'Лонг.' : 'Без' ?>
-                                        </span>
-
-                                        <span class="<?= $dogovor['financing'] !== 'Бюджет' ? 'status-active' : 'status-inactive' ?>">
-                                            <i class="fas fa-<?= $dogovor['financing'] !== 'Бюджет' ? 'check-circle' : 'times-circle' ?>"></i>
-                                            <?= $dogovor['financing'] !== 'Бюджет' ? 'Собств.' : 'Бюджет' ?>
-                                        </span>
-                                    </td>
-                                    <!-- <td class="actions-column">
-                                        <button type="button" 
-                                                class="btn btn-sm btn-warning edit-dogovor" 
-                                                data-id="<?= $dogovor['id'] ?>"
-                                                title="Редактировать">
-                                            <i class="fas fa-edit"></i>
-                                        </button> 
-                                        <button onclick="confirmDelete(<?= $dogovor['id'] ?>)" 
-                                                class="btn btn-sm btn-danger" 
-                                                title="Удалить">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>-->
-                                </tr>
-                            <?php endforeach; ?>
+                        <?php endforeach; ?>
+                        
+                        <!-- Строка-аккордеон для неактивных договоров (только если есть) -->
+                        <?php if (count($inactiveDogovors) > 0): ?>
+                            <tr class="accordion-row" id="accordionRow">
+                                <td colspan="5" style="background-color: #f5f5f5; cursor: pointer; padding: 12px; text-align: center; font-weight: bold;" onclick="toggleInactiveDogovors()">
+                                    <span id="accordionIcon">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </span>
+                                    Неактивные договоры 
+                                    <span style="background-color: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 8px;">
+                                        <?= count($inactiveDogovors) ?>
+                                    </span>
+                                </td>
+                            </tr>
                         <?php endif; ?>
+                    </tbody>
+                    
+                    <!-- Скрытые неактивные договоры -->
+                    <tbody id="inactiveDogovorsBody" style="display: none;">
+                        <?php foreach ($inactiveDogovors as $dogovor): ?>
+                            <?php
+                            // Определяем CSS класс для строки в зависимости от статуса обслуживания
+                            $rowClass = '';
+                            if ($dogovor['service_status'] == 'all_done') {
+                                $rowClass = 'service-status-all';
+                            } elseif ($dogovor['service_status'] == 'partial_done') {
+                                $rowClass = 'service-status-partial';
+                            }
+                            ?>
+                            <tr class="edit-dogovor <?= $rowClass ?> inactive-row" data-id="<?= $dogovor['id'] ?>">
+                                <td><strong><?= htmlspecialchars($dogovor['number']) ?></strong></td>
+                                <td><?= htmlspecialchars($dogovor['customer']) ?></td>
+                                <td><?= date('d.m.Y', strtotime($dogovor['date'])) ?></td>
+                                <td><?= date('d.m.Y', strtotime($dogovor['validate'])) ?></td>
+                                <td>
+                                    <span class="<?= $dogovor['is_active'] ? 'status-active' : 'status-inactive' ?>">
+                                        <i class="fas fa-<?= $dogovor['is_active'] ? 'check-circle' : 'times-circle' ?>"></i>
+                                        <?= $dogovor['is_active'] ? 'Актив.' : 'Нет' ?>
+                                    </span>
+
+                                    <span class="<?= $dogovor['prolong'] ? 'status-active' : 'status-inactive' ?>">
+                                        <i class="fas fa-<?= $dogovor['prolong'] ? 'check-circle' : 'times-circle' ?>"></i>
+                                        <?= $dogovor['prolong'] ? 'Лонг.' : 'Без' ?>
+                                    </span>
+
+                                    <span class="<?= $dogovor['financing'] !== 'Бюджет' ? 'status-active' : 'status-inactive' ?>">
+                                        <i class="fas fa-<?= $dogovor['financing'] !== 'Бюджет' ? 'check-circle' : 'times-circle' ?>"></i>
+                                        <?= $dogovor['financing'] !== 'Бюджет' ? 'Собств.' : 'Бюджет' ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
 
@@ -166,8 +355,25 @@ try {
         </div>
     </div>
 
-
     <script>
+        // Функция для переключения отображения неактивных договоров
+        function toggleInactiveDogovors() {
+            const body = document.getElementById('inactiveDogovorsBody');
+            const icon = document.querySelector('#accordionIcon i');
+            
+            if (body.style.display === 'none') {
+                body.style.display = '';
+                if (icon) {
+                    icon.className = 'fas fa-chevron-up';
+                }
+            } else {
+                body.style.display = 'none';
+                if (icon) {
+                    icon.className = 'fas fa-chevron-down';
+                }
+            }
+        }
+        
         $(document).ready(function() {
             // Открытие модального окна редактирования
             $('.edit-dogovor').click(function() {
@@ -340,7 +546,7 @@ try {
                                 location.reload();
                             }, 1500);
                         } else {
-                            console.log('Ответ ошибки сервера:', response); // Добавьте эту строку
+                            console.log('Ответ ошибки сервера:', response);
                             // Показываем сообщение об ошибке
                             $('#addErrorAlert').removeClass('d-none').text(response.message);
                         }
@@ -358,76 +564,74 @@ try {
                 });
             });
 
-
-
-// Обработка формы редактирования договора
-$('#editDogovorForm').submit(function(e) {
-    e.preventDefault();
-    
-    const form = $(this);
-    const submitBtn = form.find('button[type="submit"]');
-    const spinner = submitBtn.find('.spinner-border');
-    
-    // Собираем данные формы
-    const formData = new FormData(form[0]);
-    
-    // Явно добавляем значения для чекбоксов (1 если отмечен, 0 если нет)
-    const checkboxes = ['to1', 'avr', 'efi'];
-    checkboxes.forEach(function(name) {
-        if ($('#edit_' + name).is(':checked')) {
-            formData.set(name, '1');
-        } else {
-            formData.set(name, '0');
-        }
-    });
-    
-    console.log('Отправляемые данные:');
-    for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-    }
-    
-    // Показываем спиннер и блокируем кнопку
-    spinner.removeClass('d-none');
-    submitBtn.prop('disabled', true);
-    
-    // Скрываем предыдущие сообщения
-    $('#editErrorAlert').addClass('d-none');
-    $('#editSuccessAlert').addClass('d-none');
-    
-    $.ajax({
-        url: form.attr('action'),
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        dataType: 'json',
-        success: function(response) {
-            console.log('Ответ сервера:', response);
-            if (response.success) {
-                // Показываем сообщение об успехе
-                $('#editSuccessAlert').removeClass('d-none').text(response.message);
+            // Обработка формы редактирования договора
+            $('#editDogovorForm').submit(function(e) {
+                e.preventDefault();
                 
-                // Обновляем страницу через 1.5 секунды
-                setTimeout(function() {
-                    location.reload();
-                }, 1500);
-            } else {
-                // Показываем сообщение об ошибке
-                $('#editErrorAlert').removeClass('d-none').text(response.message);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.log('Ошибка AJAX:', status, error);
-            console.log('Ответ сервера:', xhr.responseText);
-            $('#editErrorAlert').removeClass('d-none').text('Ошибка сервера: ' + xhr.status);
-        },
-        complete: function() {
-            // Скрываем спиннер и разблокируем кнопку
-            spinner.addClass('d-none');
-            submitBtn.prop('disabled', false);
-        }
-    });
-});
+                const form = $(this);
+                const submitBtn = form.find('button[type="submit"]');
+                const spinner = submitBtn.find('.spinner-border');
+                
+                // Собираем данные формы
+                const formData = new FormData(form[0]);
+                
+                // Явно добавляем значения для чекбоксов (1 если отмечен, 0 если нет)
+                const checkboxes = ['to1', 'avr', 'efi'];
+                checkboxes.forEach(function(name) {
+                    if ($('#edit_' + name).is(':checked')) {
+                        formData.set(name, '1');
+                    } else {
+                        formData.set(name, '0');
+                    }
+                });
+                
+                console.log('Отправляемые данные:');
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                
+                // Показываем спиннер и блокируем кнопку
+                spinner.removeClass('d-none');
+                submitBtn.prop('disabled', true);
+                
+                // Скрываем предыдущие сообщения
+                $('#editErrorAlert').addClass('d-none');
+                $('#editSuccessAlert').addClass('d-none');
+                
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Ответ сервера:', response);
+                        if (response.success) {
+                            // Показываем сообщение об успехе
+                            $('#editSuccessAlert').removeClass('d-none').text(response.message);
+                            
+                            // Обновляем страницу через 1.5 секунды
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            // Показываем сообщение об ошибке
+                            $('#editErrorAlert').removeClass('d-none').text(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Ошибка AJAX:', status, error);
+                        console.log('Ответ сервера:', xhr.responseText);
+                        $('#editErrorAlert').removeClass('d-none').text('Ошибка сервера: ' + xhr.status);
+                    },
+                    complete: function() {
+                        // Скрываем спиннер и разблокируем кнопку
+                        spinner.addClass('d-none');
+                        submitBtn.prop('disabled', false);
+                    }
+                });
+            });
             
             // Сброс формы при закрытии модального окна
             $('#addDogovorModal').on('hidden.bs.modal', function() {
@@ -461,65 +665,65 @@ $('#editDogovorForm').submit(function(e) {
             });
         }, 5000);
 
-
-// Простая функция печати (без перезагрузки)
-function printTable() {
-    // Получаем HTML таблицы
-    const tableHTML = document.getElementById('dogovorTable').outerHTML;
-    // Создаем временный DOM элемент
-    const temp = document.createElement('div');
-    temp.innerHTML = tableHTML;
-    // Удаляем ненужные ячейки (последнюю колонку с кнопками)
-    const rows = temp.querySelectorAll('tr');
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('th, td');
-        if (cells.length > 5) {
-            cells[5].remove();
-            // cells[3].remove();
+        // Простая функция печати (без перезагрузки)
+        function printTable() {
+            // Получаем HTML таблицы
+            const tableHTML = document.getElementById('dogovorTable').outerHTML;
+            // Создаем временный DOM элемент
+            const temp = document.createElement('div');
+            temp.innerHTML = tableHTML;
+            // Удаляем ненужные ячейки (последнюю колонку с кнопками)
+            const rows = temp.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('th, td');
+                if (cells.length > 5) {
+                    cells[5].remove();
+                }
+            });
+            
+            // Создаем скрытый iframe для печати
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.visibility = 'hidden';
+            
+            document.body.appendChild(iframe);
+            
+            // Формируем содержимое для печати
+            const printDocument = iframe.contentWindow.document;
+            printDocument.open();
+            printDocument.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                   <style>
+                        .date, th {text-align: center;}
+                        table {width: 100%; border-collapse: collapse;}
+                        th, td {border: 1px solid #000; padding: 5px 5px;}
+                        #dogovorTable th:nth-child(5), #dogovorTable td:nth-child(5) {width: 50px; text-align: center;}
+                        #dogovorTable th:nth-child(1), #dogovorTable td:nth-child(1) {text-align: center;}
+                        .service-status-all {background-color: #d4edda !important;}
+                        .service-status-partial {background-color: #fff3cd !important;}
+                    </style>
+                </head>
+                <body>
+                    <h1 style="text-align: center;">Реестр договоров</h1>
+                    ${temp.innerHTML}
+                    <div class="count" style="margin-top: 20px; text-align: left; font-size: 14px; color: #666;">
+                        Всего записей: ${document.querySelectorAll('#dogovorTable tbody tr').length}
+                    </div>
+                </body>
+                </html>
+            `);
+            printDocument.close();
+            // Печатаем
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            // Удаляем iframe после печати
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
         }
-    });
-    
-    // Создаем скрытый iframe для печати
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.visibility = 'hidden';
-    
-    document.body.appendChild(iframe);
-    
-    // Формируем содержимое для печати
-    const printDocument = iframe.contentWindow.document;
-    printDocument.open();
-    printDocument.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-           <style>
-                .date, th {text-align: center;}
-                table {width: 100%; border-collapse: collapse;}
-                th, td {border: 1px solid #000; padding: 5px 5px;}
-                #dogovorTable th:nth-child(5), #dogovorTable td:nth-child(5) {width: 50px; text-align: center;}
-                #dogovorTable th:nth-child(1), #dogovorTable td:nth-child(1) {text-align: center;}
-            </style>
-        </head>
-        <body>
-            <h1 style="text-align: center;">Реестр договоров</h1>
-            ${temp.innerHTML}
-            <div class="count" style="margin-top: 20px; text-align: left; font-size: 14px; color: #666;">
-                Всего записей: ${document.querySelectorAll('#dogovorTable tbody tr').length}
-            </div>
-        </body>
-        </html>
-    `);
-    printDocument.close();
-    // Печатаем
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    // Удаляем iframe после печати
-    setTimeout(() => {
-        document.body.removeChild(iframe);
-    }, 1000);
-}
     </script>
 </body>
 </html>
