@@ -251,14 +251,12 @@ tr:hover {
 }
 
 /* Легенда цветов */
-.status-legend {
+/* .status-legend {
     display: flex;
     gap: 20px;
     margin-top: 10px;
     padding: 10px;
-    /* background: #f8f9fa; */
     border-radius: 5px;
-    /* font-size: 14px; */
 }
 
 .legend-item {
@@ -281,4 +279,4 @@ tr:hover {
 .legend-color.yellow {
     background-color: #fff3cd;
     border: 1px solid #ffeaa7;
-}
+} */

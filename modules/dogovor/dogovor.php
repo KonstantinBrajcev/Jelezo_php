@@ -140,7 +140,7 @@ try {
                 </button>
               </div>
 
-              <!-- Легенда цветов -->
+              <!-- Легенда цветов
               <div class="status-legend">
                   <div class="legend-item">
                       <div class="legend-color green"></div>
@@ -154,7 +154,7 @@ try {
                       <div style="width: 20px; height: 20px; border-radius: 3px; background-color: transparent; border: 1px solid #dee2e6;"></div>
                       <span>Работы не выполнялись или нет объектов</span>
                   </div>
-              </div>
+              </div> -->
 
                 <table id="dogovorTable">
                     <thead>
