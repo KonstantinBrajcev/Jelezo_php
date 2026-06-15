@@ -116,7 +116,7 @@ if ($isAjax) {
 <body>
     <?php include __DIR__ . '/../../modules/admin/user_panel.php'; ?>
 
-    <div class="document-container">
+    <div class="container">
         <div class="document-header">
             <div>
                 <button class="add-document-btn" onclick="openModal()">

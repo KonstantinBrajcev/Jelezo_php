@@ -1,8 +1,9 @@
 /* assets/css/document_styles.css */
-.document-container {
+.container {
     max-width: 1400px;
     padding: 10px;
-    /* min-height: calc(100vh - 200px); */
+    margin: 0 auto;
+    overflow-x: auto;
 }
 
 .document-header {
