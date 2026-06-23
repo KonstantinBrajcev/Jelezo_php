@@ -45,6 +45,13 @@
         <!-- Общий стиль модалок -->
         <!-- <link rel="stylesheet" href="modal-styles.css"> -->
     <?php endif; ?>
+
+    <!-- СТРАНИЦА ДОКУМЕНТЫ -->
+    <?php if ($currentPage == '/document.php'): ?>
+        <link rel="stylesheet" href="/assets/css/document_styles.css">
+        <!-- Общий стиль модалок -->
+        <!-- <link rel="stylesheet" href="modal-styles.css"> -->
+    <?php endif; ?>
     
     <!-- СТРАНИЦА ПРОБЛЕМЫ -->
     <?php if ($currentPage == '/problem.php'): ?>
