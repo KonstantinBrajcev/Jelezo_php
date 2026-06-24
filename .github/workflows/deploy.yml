@@ -21,7 +21,7 @@ jobs:
           port: 22  # SFTP порт
           local-dir: ./
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          protocol: ftp
+          protocol: sftp
           security: loose
           exclude: |
             .git
@@ -32,4 +32,5 @@ jobs:
             *.log
             README.md
             *.sqlite3
+            .ftp-deploy-sync-state.json
           log-level: verbose
