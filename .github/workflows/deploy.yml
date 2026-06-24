@@ -18,10 +18,9 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: 22  # SFTP порт
           local-dir: ./
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          protocol: sftp
+          protocol: ftp
           security: loose
           exclude: |
             .git
