@@ -9,20 +9,20 @@ $currentUser = getCurrentUser();
 
 // ПОДКЛЮЧЕНИЕ К БД SQLite3
 try {
-    $pdo = new PDO('sqlite:' . __DIR__ . '/../../includes/db.sqlite3');
+    $pdo = new PDO('sqlite:' . DB_PATH);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    // $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     
-    // ПРОВЕРКА СУЩЕСТВОВАНИЯ ТАБЛИЦЫ
-    $tableCheck = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='LIFTEH_document'");
-    $tableExists = $tableCheck->fetch();
+    // // ПРОВЕРКА СУЩЕСТВОВАНИЯ ТАБЛИЦЫ
+    // $tableCheck = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='LIFTEH_document'");
+    // $tableExists = $tableCheck->fetch();
     
-    if (!$tableExists) {
-        // Таблица не существует - выводим сообщение об ошибке
-        die("Ошибка: Таблица LIFTEH_document не найдена в базе данных. Пожалуйста, создайте таблицу.");
-    }
+    // if (!$tableExists) {
+    //     // Таблица не существует - выводим сообщение об ошибке
+    //     die("Ошибка: Таблица LIFTEH_document не найдена в базе данных. Пожалуйста, создайте таблицу.");
+    // }
     
-    // ПОЛУЧАЕМ ДАННЫЕ ИЗ ТАБЛИЦЫ (аналогично dogovor.php)
+    // ПОЛУЧАЕМ ДАННЫЕ ИЗ ТАБЛИЦЫ
     $stmt = $pdo->query("SELECT * FROM LIFTEH_document ORDER BY id DESC");
     $documents = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -125,32 +125,32 @@ if ($isAjax) {
             </div>
         </div>
         
-        <div style="overflow-x: auto;">
+        <div>
             <table class="document-table" id="documentTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Название документа</th>
-                        <th>Категория</th>
-                        <th>Ссылка</th>
-                        <th>Действия</th>
+                        <!-- <th style="width: 5%;">ID</th> -->
+                        <th>Наименование</th>
+                        <th style="width: 10%;">Категория</th>
+                        <th style="width: 5%;">Ссылка</th>
+                        <th style="width: 5%;">Действия</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     <?php if (count($documents) > 0): ?>
                         <?php foreach ($documents as $doc): ?>
                             <tr>
-                                <td><?= htmlspecialchars($doc['id']) ?></td>
+                                <!-- <td><?= htmlspecialchars($doc['id']) ?></td> -->
                                 <td><strong><?= htmlspecialchars($doc['name']) ?></strong></td>
                                 <td><span class="category-badge"><?= htmlspecialchars($doc['category']) ?></span></td>
                                 <td>
                                     <a href="<?= htmlspecialchars($doc['link']) ?>" target="_blank" class="document-link">
-                                        <i class="fas fa-file-pdf"></i> Открыть документ
+                                        <i class="fas fa-file-pdf"></i>
                                     </a>
                                 </td>
                                 <td>
                                     <button class="delete-btn" onclick="deleteDocument(<?= $doc['id'] ?>)">
-                                        <i class="fas fa-trash"></i> Удалить
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -171,7 +171,7 @@ if ($isAjax) {
     <div id="documentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Добавить нормативный документ</h2>
+                <h2>Добавление документ</h2>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <form id="documentForm" enctype="multipart/form-data">
@@ -188,7 +188,6 @@ if ($isAjax) {
                             <option value="Указ">Указ</option>
                             <option value="Закон">Закон</option>
                             <option value="Регламент">Регламент</option>
-                            <option value="Нормативный документ">Нормативный документ</option>
                             <option value="Приказ">Приказ</option>
                             <option value="Инструкция">Инструкция</option>
                         </select>
