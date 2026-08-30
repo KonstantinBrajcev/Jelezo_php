@@ -7,6 +7,13 @@ checkAuth();
 $currentUser = getCurrentUser();
 // Определяем, является ли пользователь суперпользователем
 $isSuperAdmin = ($currentUser['is_superuser'] ?? 0) == 1;
+
+// Проверяем, если пользователь не админ - перенаправляем
+if (($currentUser['is_staff'] ?? 1) == 0) {
+    header('Location: guest.php');
+    exit();
+}
+
 // Настройки подключения к базе данных
 $databaseFile = __DIR__ . '/includes/db.sqlite3';
 // Определяем текущий месяц (1-12)

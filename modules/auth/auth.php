@@ -10,8 +10,9 @@ if (!defined('DB_PATH')) {
     define('DB_PATH', __DIR__ . '/../../includes/db.sqlite3');
 }
 
-/** Проверяеv, авторизован ли user
-  * Если нет - перенаправляет на страницу login */
+/**
+ * Проверяет авторизацию пользователя и перенаправляет в зависимости от роли
+ */
 function checkAuth() {
     global $databaseFile;
     // Проверяем, авторизован ли пользователь
@@ -21,27 +22,68 @@ function checkAuth() {
         header('Location: /modules/auth/login.php');
         exit();
     }
+    
     // Проверяем существование пользователя в БД
     try {
         $pdo = new PDO("sqlite:" . DB_PATH);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $stmt = $pdo->prepare("SELECT id FROM auth_user WHERE id = ? AND is_active = 1");
+        $stmt = $pdo->prepare("SELECT id, is_staff, is_superuser, dogovor FROM auth_user WHERE id = ? AND is_active = 1");
         $stmt->execute([$_SESSION['user_id']]);
-        $user = $stmt->fetch();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
         if (!$user) {
             // Пользователь не найден или неактивен
             session_destroy();
-            // header('Location: login.php?error=session_expired');
             header('Location: /modules/auth/login.php?error=session_expired');
             exit();
         }
+        
+        // Сохраняем информацию о пользователе в сессии
+        $_SESSION['is_staff'] = $user['is_staff'] ?? 0;
+        $_SESSION['is_superuser'] = $user['is_superuser'] ?? 0;
+        $_SESSION['dogovor_id'] = $user['dogovor'] ?? null;
+        
+        // Если пользователь is_staff = 0, перенаправляем на гостевую страницу
+        // (кроме случаев, когда он уже на гостевой странице или странице входа)
+        $currentPage = basename($_SERVER['PHP_SELF']);
+        if ($user['is_staff'] == 0 && $currentPage != 'guest.php' && $currentPage != 'login.php') {
+            header('Location: /guest.php');
+            exit();
+        }
+        
+        return $user;
+        
     } catch (PDOException $e) {
         // В случае ошибки БД перенаправляем на логин
         session_destroy();
         header('Location: /modules/auth/login.php?error=db_error');
-        // header('Location: login.php?error=db_error');
         exit();
     }
+}
+
+/**
+ * Проверяет, имеет ли пользователь доступ к странице
+ * Если is_staff = 0, разрешает доступ только к guest.php
+ */
+function checkPageAccess() {
+    if (!isset($_SESSION['user_id'])) {
+        return false;
+    }
+    
+    $currentPage = basename($_SERVER['PHP_SELF']);
+    $isStaff = $_SESSION['is_staff'] ?? 0;
+    
+    // Если пользователь не является сотрудником (is_staff = 0)
+    if ($isStaff == 0) {
+        // Разрешаем доступ только к guest.php и странице выхода
+        $allowedPages = ['guest.php', 'logout.php', 'login.php'];
+        if (!in_array($currentPage, $allowedPages)) {
+            header('Location: /guest.php');
+            exit();
+        }
+    }
+    
+    return true;
 }
 
 /** ПРОВЕРКА НА SUPERUSER
@@ -62,18 +104,15 @@ function checkSuperuser() {
         if (!$user || $user['is_superuser'] != 1) {
             // Пользователь не суперпользователь
             header('Location: /modules/admin/access_denied.php');
-            // header('Location: access_denied.php');
             exit();
         }
         return true;
     } catch (PDOException $e) {
         error_log("Ошибка проверки superuser: " . $e->getMessage());
-        // header('Location: access_denied.php');
         header('Location: /modules/admin/access_denied.php');
         exit();
     }
 }
-
 
 /** Получает информацию о текущем пользователе */
 function getCurrentUser() {
@@ -84,7 +123,7 @@ function getCurrentUser() {
     try {
         $pdo = new PDO("sqlite:" . DB_PATH);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $stmt = $pdo->prepare("SELECT id, username, email, first_name, last_name, is_superuser, is_active FROM auth_user WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT id, username, email, first_name, last_name, is_superuser, is_staff, is_active, dogovor FROM auth_user WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -103,22 +142,27 @@ function verifyUserCredentials($username, $password) {
         $pdo = new PDO("sqlite:" . DB_PATH);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         // Ищем пользователя
-        $stmt = $pdo->prepare("SELECT id, pass, is_active FROM auth_user WHERE username = ?");
+        $stmt = $pdo->prepare("SELECT id, pass, is_active, is_staff, dogovor FROM auth_user WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
         if (!$user) {
             return false; // Пользователь не найден
         }
+        
         // Проверяем активность пользователя
         if (!$user['is_active']) {
             return false; // Пользователь неактивен
         }
+        
         // Проверяем пароль с помощью password_verify
         if (password_verify($password, $user['pass'])) {
             // Пароль верный
             return [
                 'id' => $user['id'],
-                'username' => $username
+                'username' => $username,
+                'is_staff' => $user['is_staff'] ?? 0,
+                'dogovor_id' => $user['dogovor'] ?? null
             ];
         }
         return false; // Неверный пароль
@@ -155,6 +199,7 @@ function createUser($username, $password, $additionalData = []) {
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         // Хешируем пароль
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        
         // Подготавливаем данные для вставки
         $defaultData = [
             'username' => $username,
@@ -165,6 +210,7 @@ function createUser($username, $password, $additionalData = []) {
             'date_joined' => date('Y-m-d H:i:s')
         ];
         $data = array_merge($defaultData, $additionalData);
+        
         // Формируем SQL запрос
         $columns = implode(', ', array_keys($data));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));

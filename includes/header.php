@@ -69,6 +69,14 @@
     <?php endif; ?>
 
 
+    <!-- СТРАНИЦА USER -->
+    <?php if ($currentPage == '/guest.php'): ?>
+        <link rel="stylesheet" href="/assets/css/guest_styles.css">
+        <!-- Общий стиль модалок -->
+        <link rel="stylesheet" href="/assets/css/modal-styles.css">
+    <?php endif; ?>
+
+
     <!-- В header.php добавьте: -->
     <?php if ($currentPage == '/charts.php'): ?>
         <link rel="stylesheet" href="/assets/css/charts_styles.css">
