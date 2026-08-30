@@ -75,7 +75,7 @@ $pageTitle = 'Список оборудования' . ($customerName ? ' - ' . 
             <div class="user-info">
                 <span class="username">
                     <i class="fas fa-user"></i> 
-                    <?php echo htmlspecialchars($currentUser['first_name'] ?? $currentUser['username'] ?? 'Пользователь'); ?>
+                    <?php echo htmlspecialchars($currentUser['first_name']. ' '. $currentUser['last_name'] ?? $currentUser['username'] ?? 'Пользователь'); ?>
                 </span>
                 <a href="/modules/auth/logout.php" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Выйти
@@ -130,21 +130,26 @@ $pageTitle = 'Список оборудования' . ($customerName ? ' - ' . 
                                 if ($lastResult !== null) {
                                     if ($lastResult == 0 || $lastResult === '0') {
                                         $statusClass = 'success';
-                                        $statusText = '✅ Работает';
+                                        $statusText = 'Работает';
+                                        // $statusText = '✅ Работает';
                                     } elseif ($lastResult == 1 || $lastResult === '1') {
                                         $statusClass = 'warning';
-                                        $statusText = '⚠️ Есть замечания';
+                                        $statusText = 'Замечания';
+                                        // $statusText = '⚠️ Есть замечания';
                                     } elseif ($lastResult == 2 || $lastResult === '2') {
                                         $statusClass = 'danger';
-                                        $statusText = '❌ Не работает';
+                                        $statusText = 'Не работает';
+                                        // $statusText = '❌ Не работает';
                                     } else {
                                         $statusClass = 'secondary';
-                                        $statusText = '❓ Неизвестно';
+                                        $statusText = 'Неизвестно';
+                                        // $statusText = '❓ Неизвестно';
                                     }
                                 } else {
                                     // Если нет записей о обслуживании
                                     $statusClass = 'secondary';
-                                    $statusText = '❓ Нет данных';
+                                    $statusText = 'Нет данных';
+                                    // $statusText = '❓ Нет данных';
                                 }
                             ?>
                                 <tr>

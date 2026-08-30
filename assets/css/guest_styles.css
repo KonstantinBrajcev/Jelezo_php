@@ -224,10 +224,22 @@ tbody tr:hover {
     margin-top: 2px;
 }
 
+@media (max-width: 1000px) {
+
+    /* Скрываем некоторые колонки на мобильных */
+    th:nth-child(5), td:nth-child(5) {
+        display: none;
+    }
+}
+
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
         text-align: center;
+    }
+
+    .container {
+        padding: 10px;
     }
     
     .user-info {
@@ -240,12 +252,17 @@ tbody tr:hover {
     }
     
     th, td {
-        padding: 8px 10px;
+        padding: 6px 8px;
     }
     
     /* Скрываем некоторые колонки на мобильных */
-    th:nth-child(4), td:nth-child(4),
-    th:nth-child(5), td:nth-child(5) {
+    th:nth-child(4), td:nth-child(4) {
+        display: none;
+    }
+}
+@media (max-width: 530px) {
+    /* Скрываем некоторые колонки на мобильных */
+    th:nth-child(1), td:nth-child(1) {
         display: none;
     }
 }
