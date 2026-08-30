@@ -31,4 +31,5 @@ jobs:
             *.log
             README.md
             *.sqlite3
+            .ftp-deploy-sync-state.json
           log-level: verbose

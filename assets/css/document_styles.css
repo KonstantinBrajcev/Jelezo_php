@@ -1,8 +1,9 @@
 /* assets/css/document_styles.css */
-.document-container {
+.container {
     max-width: 1400px;
     padding: 10px;
-    /* min-height: calc(100vh - 200px); */
+    margin: 0 auto;
+    overflow-x: auto;
 }
 
 .document-header {
@@ -43,13 +44,13 @@
 .document-table th {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 15px;
+    padding: 10px;
     text-align: left;
     font-weight: 600;
 }
 
 .document-table td {
-    padding: 12px 15px;
+    padding: 5px 10px;
     border-bottom: 1px solid #f0f0f0;
 }
 
