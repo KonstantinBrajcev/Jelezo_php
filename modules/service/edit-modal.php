@@ -11,7 +11,7 @@
             <input type="hidden" id="editId" name="id">
             
             <div class="form-group form-floating">
-                <input type="text" class="form-control" id="editCustomer" name="customer" required>
+                <input type="text" class="form-control" id="editCustomer" name="customer" readonly>
                 <label for="editCustomer">Заказчик:</label>
             </div>
             

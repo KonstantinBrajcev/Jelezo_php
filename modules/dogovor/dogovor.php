@@ -327,7 +327,7 @@ try {
                             $('#edit_is_active').prop('checked', response.data.is_active == 1);
                             $('#edit_created_at').text(response.data.created_at_formatted);
                             $('#edit_updated_at').text(response.data.updated_at_formatted);
-                            $('#editDogovorModalLabel').text('Редактировать договор #' + response.data.id);
+                            // $('#editDogovorModalLabel').text('Редактировать договор #' + response.data.id);
                             
                             // Устанавливаем radio-кнопку prolong
                             const prolongValue = parseInt(response.data.prolong);

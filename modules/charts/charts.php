@@ -116,6 +116,40 @@ try {
 <body>
     <?php include __DIR__ . '/../../modules/admin/user_panel.php'; ?>
 
+
+            <div class="controls" style="padding: 0px 5px ;">
+
+            <!-- БЛОК С КНОПКАМИ -->
+              <div class="button-group">
+                <a href="/map.php" class="map-button">
+                    <span class="button-text">Карта</span>
+                    <i class="fas fa-map"></i>
+                </a>
+
+                <a href="/index.php" class="map-button">
+                    <span class="button-text">Таблица</span>
+                    <i class="fas fa-table"></i>
+                </a>
+
+                <a href="/problem.php" class="map-button">
+                    <span class="button-text">Проблемы</span>
+                    <i class="fas fa-list"></i>
+                </a>
+
+                <a href="/dogovor.php" class="map-button">
+                    <span class="button-text">Договора</span>
+                    <i class="fas fa-chart-line"></i>
+                </a>
+
+                <a href="avr.php" class="map-button">
+                    <span class="button-text">АВР</span>
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+
+              </div>
+            </div>
+
+
     <div class="container-fluid py-4">
         <div class="row mb-4">
             <div class="col-12">
@@ -127,7 +161,8 @@ try {
         <div class="row g-4 mb-4">
             <!-- Общее количество договоров -->
             <div class="col-md-6 col-lg-3">
-                <div class="card stats-card" style="height: 100%;">
+                <div class="card stats-card" style="height: 100%;" 
+                onclick="window.location.href='dogovor.php'">
                     <div class="card-body align-content-center">
                         <div class="d-flex align-items-center">
                             <div class="stats-icon bg-primary">
@@ -153,7 +188,8 @@ try {
 
             <!-- Общее количество объектов -->
             <div class="col-md-6 col-lg-3">
-                <div class="card stats-card" style="height: 100%;">
+                <div class="card stats-card" style="height: 100%;"
+                onclick="window.location.href='index.php'">
                     <div class="card-body align-content-center">
                         <div class="d-flex align-items-center">
                             <div class="stats-icon bg-success">
@@ -238,7 +274,7 @@ try {
                                 ['position' => 'Маркетолог (Берсенева)', 'percent' => 11.5],
                                 ['position' => 'Гл. бухгалтер (Евтухова)', 'percent' => 9],
                                 ['position' => 'Электромеханик по подъемникам (Кравченко)', 'percent' => 8.7],
-                                ['position' => 'Электромеханик по подъемникам (Короткий)', 'percent' => 8],
+                                // ['position' => 'Электромеханик по подъемникам (Короткий)', 'percent' => 8],
                                 ['position' => 'Электромеханик по подъемникам (Гамалеев)', 'percent' => 3],
                                 ['position' => 'Автомеханик (Беликов)', 'percent' => 5]
                             ];

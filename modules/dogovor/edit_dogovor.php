@@ -253,9 +253,6 @@ $financingOptions = [
 
 
 
-
-
-
 <script>
 // Функция загрузки объектов для договора
 function loadObjects(dogovorId) {

@@ -49,7 +49,8 @@ try {
     // ВЫБИРАЕМ ВСЕ СТОЛБЦЫ ДЛЯ РЕДАКТИРОВАНИЯ
     $sql = "SELECT 
             LIFTEH_object. *,
-            LIFTEH_dogovor.number as dogovor_number
+            LIFTEH_dogovor.number as dogovor_number, 
+            LIFTEH_dogovor.customer as dogovor_customer
         FROM LIFTEH_object 
         LEFT JOIN LIFTEH_dogovor ON LIFTEH_object.dogovor_id = LIFTEH_dogovor.id
             WHERE $selectedMonthColumn IS NOT NULL 
@@ -354,8 +355,13 @@ try {
                     </td>
 
                     <!-- Колонка ЗАКАЗЧИК -->
-                    <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                    <!-- <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
                         <?php echo htmlspecialchars($row['customer'] ?? ''); ?>
+                    </td> -->
+
+                    <!-- Колонка ЗАКАЗЧИК -->
+                    <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
+                        <?php echo htmlspecialchars($row['dogovor_customer'] ?? $row['customer'] ?? ''); ?>
                     </td>
 
                     <!-- Колонка АДРЕС -->
@@ -393,7 +399,7 @@ try {
                     <td class="actions-column">
 
                         <!-- Кнопка обслуживания -->
-                        <button class="service-btn" onclick="openServiceModal(<?php echo htmlspecialchars($objectId); ?>, '<?php echo htmlspecialchars($row['customer'] ?? ''); ?>', '<?php echo htmlspecialchars($row['address'] ?? ''); ?>')"
+                        <button class="service-btn" onclick="openServiceModal(<?php echo htmlspecialchars($objectId); ?>, '<?php echo htmlspecialchars($row['dogovor_customer'] ?? $row['customer'] ?? ''); ?>', '<?php echo htmlspecialchars($row['address'] ?? ''); ?>')"
                                 title="<?php echo $hasServices ? 'Последнее ТО: ' . ($lastService ? htmlspecialchars($lastService) : '') . ' (всего: ' . $serviceCount . ')' : 'Нет записей о ТО'; ?>">
                             <i class="fas fa-wrench"></i>
                             <?php if ($hasServices && $serviceCount > 0): ?>
@@ -451,7 +457,7 @@ function updateTableRow(data) {
     const row = document.querySelector(`tr[data-id="${data.id}"]`);
     if (row) {
         // Обновляем ячейки
-        row.cells[1].textContent = data.customer || '';
+        row.cells[1].textContent = data.dogovor_customer || data.customer || '';
         row.cells[2].innerHTML = data.address ? 
             `<a href="https://yandex.ru/maps/?text=${encodeURIComponent(data.address)}" target="_blank" class="address-link">${data.address}</a>` : 
             '<span class="no-address">нет адреса</span>';
@@ -675,101 +681,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-
-
-
-// // Расширенная отладка для проверки активных медиазапросов
-// window.addEventListener('DOMContentLoaded', function() {
-//     const width = window.innerWidth;
-//     const devicePixelRatio = window.devicePixelRatio || 1;
-    
-//     // Проверяем, какие CSS правила реально применяются к таблице
-//     const table = document.getElementById('sortableTable');
-//     if (table) {
-//         const headers = table.querySelectorAll('thead th');
-//         const activeColumns = [];
-//         const hiddenColumns = [];
-        
-//         headers.forEach((th, index) => {
-//             const computedStyle = window.getComputedStyle(th);
-//             const isVisible = computedStyle.display !== 'none';
-//             const columnName = th.textContent.trim();
-            
-//             if (isVisible) {
-//                 activeColumns.push({ index: index + 1, name: columnName });
-//             } else {
-//                 hiddenColumns.push({ index: index + 1, name: columnName, display: computedStyle.display });
-//             }
-//         });
-        
-//         // Создаем детальную панель отладки
-//         const debugPanel = document.createElement('div');
-//         debugPanel.style.cssText = `
-//             position: fixed;
-//             bottom: 10px;
-//             left: 10px;
-//             right: 10px;
-//             background: rgba(0,0,0,0.95);
-//             color: #0f0;
-//             padding: 15px;
-//             font-size: 11px;
-//             z-index: 99999;
-//             font-family: monospace;
-//             border-radius: 8px;
-//             border: 2px solid #0f0;
-//             max-height: 80%;
-//             overflow-y: auto;
-//             pointer-events: auto;
-//             cursor: pointer;
-//         `;
-        
-//         let html = `
-//             <strong>🔍 ДЕТАЛЬНАЯ ОТЛАДКА</strong><br>
-//             <hr>
-//             📱 CSS ширина: ${width}px<br>
-//             📱 DPR: ${devicePixelRatio}<br>
-//             📱 User Agent: ${navigator.userAgent}<br>
-//             <hr>
-//             <strong>📊 ВИДИМЫЕ КОЛОНКИ (${activeColumns.length}):</strong><br>
-//         `;
-        
-//         activeColumns.forEach(col => {
-//             html += `✅ Колонка ${col.index}: ${col.name}<br>`;
-//         });
-        
-//         if (hiddenColumns.length > 0) {
-//             html += `<br><strong>❌ СКРЫТЫЕ КОЛОНКИ (${hiddenColumns.length}):</strong><br>`;
-//             hiddenColumns.forEach(col => {
-//                 html += `❌ Колонка ${col.index}: ${col.name} (display: ${col.display})<br>`;
-//             });
-//         }
-        
-//         // Проверяем медиазапросы
-//         html += `<br><strong>🎨 АКТИВНЫЕ МЕДИАЗАПРОСЫ:</strong><br>`;
-        
-//         // Проверяем, какие медиазапросы срабатывают
-//         const testWidths = [576, 768, 992, 1200];
-//         testWidths.forEach(testWidth => {
-//             const isMatch = window.matchMedia(`(max-width: ${testWidth}px)`).matches;
-//             html += `${isMatch ? '✅' : '❌'} max-width: ${testWidth}px - ${isMatch ? 'АКТИВЕН' : 'не активен'}<br>`;
-//         });
-        
-//         html += `<br><em>👆 Нажмите для закрытия</em>`;
-        
-//         debugPanel.innerHTML = html;
-//         document.body.appendChild(debugPanel);
-        
-//         debugPanel.onclick = function() {
-//             this.remove();
-//         };
-        
-//         // Также выводим в консоль
-//         console.log('=== ОТЛАДКА ТАБЛИЦЫ ===');
-//         console.log('Видимые колонки:', activeColumns.map(c => `${c.index}:${c.name}`).join(', '));
-//         console.log('Скрытые колонки:', hiddenColumns.map(c => `${c.index}:${c.name}`).join(', '));
-//     }
-// });
 </script>
 
 

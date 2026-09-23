@@ -80,8 +80,8 @@
     <!-- В header.php добавьте: -->
     <?php if ($currentPage == '/charts.php'): ?>
         <link rel="stylesheet" href="/assets/css/charts_styles.css">
+        <link rel="stylesheet" href="/assets/css/index_styles.css">
     <?php endif; ?>
-    <!-- <link rel="stylesheet" href="modal-styles.css"> -->
 
     <!-- ============ ПОДКЛЮЧЕНИЕ СКРИПТОВ ============ -->
     <!-- 1. СНАЧАЛА jQuery -->

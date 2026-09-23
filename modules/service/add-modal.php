@@ -8,10 +8,10 @@
         </div>
         
         <form id="addForm">
-            <div class="form-group form-floating">
-                <input type="text" class="form-control" id="addCustomer" name="customer" required>
+            <!-- <div class="form-group form-floating" hidden>
+                <input type="text" class="form-control" id="addCustomer" name="customer">
                 <label for="addCustomer">Заказчик:</label>
-            </div>
+            </div> -->
             
             <div class="form-group form-floating">
                 <input type="text" class="form-control" id="addAddress" name="address">

@@ -7,7 +7,7 @@ function openEditModal(rowData) {
 
     // Заполняем форму данными
     document.getElementById('editId').value = rowData.id || '';
-    document.getElementById('editCustomer').value = rowData.customer || '';
+    document.getElementById('editCustomer').value = rowData.dogovor_customer || '';
     document.getElementById('editAddress').value = rowData.address || '';
     document.getElementById('editModel').value = rowData.model || '';
     document.getElementById('editNumber').value = rowData.serial_number || '';
