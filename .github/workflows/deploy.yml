@@ -12,16 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Check FTP control port
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_PORT: "21"
-        run: |
-          : "${FTP_HOST:?FTP_HOST is empty}"
-          getent hosts "$FTP_HOST"
-          timeout 10 bash -c 'cat < /dev/null > /dev/tcp/$1/$2' _ "$FTP_HOST" "$FTP_PORT"
-          echo "FTP control port is reachable"
-      
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
@@ -31,7 +21,6 @@ jobs:
           local-dir: ./
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
           protocol: ftp
-          security: loose
           exclude: |
             .git
             .git/
