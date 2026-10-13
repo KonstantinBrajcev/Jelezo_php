@@ -2,8 +2,7 @@
 // edit_avr.php - ТОЛЬКО HTML форма
 // Получаем список объектов для выпадающего списка
 try {
-    $db = new PDO('sqlite:' . DB_PATH);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = getDbConnection();
     
     // Получаем список объектов
     $sql_objects = "SELECT id, customer, address FROM LIFTEH_object ORDER BY customer, address";
@@ -22,7 +21,7 @@ try {
     <div id="editErrorAlert" class="alert alert-danger d-none" role="alert"></div>
     <div id="editSuccessAlert" class="alert alert-success d-none" role="alert"></div>
     
-    <form id="editAvrForm" action="/../../modules/avr/edit_avr_handler.php" method="POST">
+    <form id="editAvrForm" action="/modules/avr/edit_avr_handler.php" method="POST">
         <input type="hidden" id="edit_id" name="id">
         
         <div class="mb-3 form-group form-floating">
@@ -90,21 +89,18 @@ let editWorkCounter = 0;
 
 // Функция для добавления блока работы в форму редактирования
 function addEditWorkBlock(index, workData = null) {
-    const workName = workData ? workData.work_name : '';
-    const quantity = workData ? workData.quantity : '';
-    const unit = workData ? workData.unit : 'шт';
-    
-    // Экранируем специальные символы для безопасной вставки в HTML
-    const escapedWorkName = workName.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    }).replace(/["']/g, function(m) {
-        if (m === '"') return '&quot;';
-        if (m === "'") return '&#39;';
-        return m;
-    });
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[character]);
+    const workName = String(workData && workData.work_name ? workData.work_name : '');
+    const quantity = String(workData && workData.quantity ? workData.quantity : '1');
+    const unit = String(workData && workData.unit ? workData.unit : 'шт');
+    const escapedWorkName = escapeHtml(workName);
+    const escapedQuantity = escapeHtml(quantity);
     
     const workHtml = `
         <div class="work-item mb-2 p-1 border rounded" data-work-index="${index}">
@@ -121,7 +117,7 @@ function addEditWorkBlock(index, workData = null) {
             
             <div class="input-group">
                 <span class="input-group-text">Кол-во</span>
-                <input type="number" class="form-control work-quantity" name="works[${index}][quantity]" value="${quantity ? quantity : 1}" step="1" required placeholder="">
+                <input type="number" class="form-control work-quantity" name="works[${index}][quantity]" value="${escapedQuantity}" step="1" required placeholder="">
                 <span class="input-group-text">ед.изм.</span>
                 <select class="form-select work-unit" name="works[${index}][unit]">
                     <option value="шт" ${unit === 'шт' ? 'selected' : ''}>шт</option>
@@ -143,7 +139,7 @@ function addEditWorkBlock(index, workData = null) {
 // Функция для загрузки данных в форму редактирования
 function loadAvrData(id) {
     $.ajax({
-        url: '/../../modules/avr/get_avr_ajax.php',
+        url: '/modules/avr/get_avr_ajax.php',
         type: 'GET',
         data: { id: id },
         dataType: 'json',
@@ -163,8 +159,7 @@ function loadAvrData(id) {
                 
                 // Устанавливаем дату
                 if (response.data.insert_date) {
-                    const date = new Date(response.data.insert_date);
-                    const formattedDate = date.toISOString().slice(0, 16);
+                    const formattedDate = String(response.data.insert_date).replace(' ', 'T').slice(0, 16);
                     $('#edit_insert_date').val(formattedDate);
                 }
                 
@@ -210,7 +205,7 @@ function loadAvrData(id) {
 
 // Функция обновления видимости кнопок удаления
 function updateRemoveButtonsVisibility() {
-    const workItems = $('.work-item');
+    const workItems = $('#edit-works-container .work-item');
     if (workItems.length === 1) {
         workItems.find('.remove-work').hide();
     } else {
@@ -220,7 +215,7 @@ function updateRemoveButtonsVisibility() {
 
 // Обновление номеров работ
 function updateWorkNumbers() {
-    $('.work-item').each(function(index) {
+    $('#edit-works-container .work-item').each(function(index) {
         $(this).find('strong').text(`Работа №${index + 1}`);
         $(this).attr('data-work-index', index);
         
@@ -229,14 +224,12 @@ function updateWorkNumbers() {
         $(this).find('.work-quantity').attr('name', `works[${index}][quantity]`);
         $(this).find('.work-unit').attr('name', `works[${index}][unit]`);
     });
-    editWorkCounter = $('.work-item').length;
+    editWorkCounter = $('#edit-works-container .work-item').length;
 }
 
 $(document).ready(function() {
-    $('.edit-avr').click(function() {
-    const id = $(this).data('id');
-    // console.log('Клик по кнопке редактирования, ID:', id);
-    loadAvrData(id);
+    $('#avrTable').on('click', '.edit-avr', function() {
+        loadAvrData($(this).data('id'));
     });
 
     // Добавление новой работы в форму редактирования
@@ -248,7 +241,7 @@ $(document).ready(function() {
     });
     
     // Удаление работы
-    $(document).on('click', '.remove-work', function() {
+    $(document).on('click', '#edit-works-container .remove-work', function() {
         $(this).closest('.work-item').remove();
         updateRemoveButtonsVisibility();
         updateWorkNumbers();
@@ -259,18 +252,18 @@ $(document).ready(function() {
         e.preventDefault();
         
         const form = $(this);
-        const submitBtn = form.find('button[type="submit"]');
+        const submitBtn = $('#editAvrModal button[type="submit"]');
         const spinner = submitBtn.find('.spinner-border');
         
         // Проверяем, есть ли хотя бы одна работа
-        if ($('.work-item').length === 0) {
+        if ($('#edit-works-container .work-item').length === 0) {
             $('#editErrorAlert').removeClass('d-none').text('Добавьте хотя бы одну работу');
             return;
         }
         
         // Проверяем заполнение всех работ
         let isValid = true;
-        $('.work-item').each(function(index) {
+        $('#edit-works-container .work-item').each(function(index) {
             const workName = $(this).find('.work-name').val().trim();
             const quantity = $(this).find('.work-quantity').val();
             

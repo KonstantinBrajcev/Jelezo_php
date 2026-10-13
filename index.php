@@ -1,6 +1,6 @@
 <?php
 // index.php
-// $currentRoute = 'index';
+require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/modules/auth/auth.php';
 checkAuth();
 // Получаем информацию о текущем пользователе
@@ -27,13 +27,19 @@ $selectedMonth = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
 // Ограничиваем значение от 1 до 12
 $selectedMonth = max(1, min(12, $selectedMonth));
 
+$months = [
+    1 => 'январь', 2 => 'февраль', 3 => 'март',
+    4 => 'апрель', 5 => 'май', 6 => 'июнь',
+    7 => 'июль', 8 => 'август', 9 => 'сентябрь',
+    10 => 'октябрь', 11 => 'ноябрь', 12 => 'декабрь'
+];
+
 $selectedMonthColumn = 'M' . $selectedMonth;
 
 try {
     // Создаем подключение через PDO
-    $pdo = new PDO("sqlite:" . DB_PATH);
-    // Устанавливаем режим ошибок
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = getDbConnection();
+    ensureDogovorContactColumns($pdo);
     // Проверяем существование таблицы
     $tableExists = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='LIFTEH_object'")->fetch();
 
@@ -48,14 +54,22 @@ try {
     // Получаем только те записи, где в колонке текущего месяца есть цифра
     // ВЫБИРАЕМ ВСЕ СТОЛБЦЫ ДЛЯ РЕДАКТИРОВАНИЯ
     $sql = "SELECT 
-            LIFTEH_object. *,
+            LIFTEH_object.*,
             LIFTEH_dogovor.number as dogovor_number, 
-            LIFTEH_dogovor.customer as dogovor_customer
+            LIFTEH_dogovor.customer as dogovor_customer,
+            LIFTEH_dogovor.responsible_name as dogovor_responsible_name,
+            LIFTEH_dogovor.responsible_phone as dogovor_responsible_phone
         FROM LIFTEH_object 
         LEFT JOIN LIFTEH_dogovor ON LIFTEH_object.dogovor_id = LIFTEH_dogovor.id
             WHERE $selectedMonthColumn IS NOT NULL 
             AND $selectedMonthColumn != '' 
-            AND CAST($selectedMonthColumn AS TEXT) != '0'";
+            AND CAST($selectedMonthColumn AS TEXT) != '0'
+            AND NOT EXISTS (
+                SELECT 1
+                FROM LIFTEH_dogovor inactive_dogovor
+                WHERE inactive_dogovor.id = LIFTEH_object.dogovor_id
+                  AND inactive_dogovor.is_active = 0
+            )";
 
     $stmt = $pdo->query($sql);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -64,68 +78,47 @@ try {
     die('<div class="error">Ошибка подключения к базе данных: ' . $e->getMessage() . '</div>');
 }
 
-// Массив месяцев для отображения
-$months = [
-    1 => 'январь', 2 => 'февраль', 3 => 'март',
-    4 => 'апрель', 5 => 'май', 6 => 'июнь',
-    7 => 'июль', 8 => 'август', 9 => 'сентябрь',
-    10 => 'октябрь', 11 => 'ноябрь', 12 => 'декабрь'
-];
-
 $selectedMonthName = $months[$selectedMonth] ?? 'неизвестный месяц';
-
 $currentMonthName = $months[$currentMonth] ?? 'неизвестный месяц';
 $idField = 'id'; // Получаем ID поля
-
 
 // Получаем информацию о сервисах для каждого объекта
 $serviceInfo = [];
 try {
-    // Получаем последний сервис ДО или В выбранном месяце
     $lastDayOfMonth = date('Y-m-t', mktime(0, 0, 0, $selectedMonth, 1, date('Y')));
-    
-    // ИСПРАВЛЕННЫЙ ЗАПРОС - без вложенного MAX()
-    $serviceStmt = $pdo->prepare("
-        SELECT 
-            object_id,
-            service_date as last_service,
-            result as last_result,
-            COUNT(*) OVER (PARTITION BY object_id) as service_count,
-            strftime('%m', service_date) as last_service_month,
-            strftime('%Y', service_date) as last_service_year
-        FROM LIFTEH_service 
-        WHERE service_date <= :lastDayOfMonth
-        AND (object_id, service_date) IN (
-            SELECT object_id, MAX(service_date)
-            FROM LIFTEH_service
-            WHERE service_date <= :lastDayOfMonth2
-            GROUP BY object_id
-        )
-    ");
-    
-    $serviceStmt->execute([
-        ':lastDayOfMonth' => $lastDayOfMonth,
-        ':lastDayOfMonth2' => $lastDayOfMonth
-    ]);
-    $serviceData = $serviceStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    foreach ($serviceData as $service) {
-        $serviceInfo[$service['object_id']] = $service;
+    $serviceStmt = $pdo->prepare("
+        SELECT
+            latest.object_id,
+            s.service_date AS last_service,
+            s.result AS last_result,
+            COALESCE(counts.service_count, 0) AS service_count,
+            strftime('%m', s.service_date) AS last_service_month,
+            strftime('%Y', s.service_date) AS last_service_year
+        FROM (
+            SELECT object_id, MAX(service_date) AS max_service_date
+            FROM LIFTEH_service
+            WHERE service_date <= :limitDate
+            GROUP BY object_id
+        ) AS latest
+        JOIN LIFTEH_service s
+            ON s.object_id = latest.object_id
+           AND s.service_date = latest.max_service_date
+        LEFT JOIN (
+            SELECT object_id, COUNT(*) AS service_count
+            FROM LIFTEH_service
+            WHERE service_date <= :limitDate
+            GROUP BY object_id
+        ) AS counts
+            ON counts.object_id = latest.object_id
+    ");
+
+    $serviceStmt->execute([':limitDate' => $lastDayOfMonth]);
+    foreach ($serviceStmt->fetchAll(PDO::FETCH_ASSOC) as $service) {
+        $serviceInfo[(int) $service['object_id']] = $service;
     }
-    
-    // Отладка
-    // echo '<div class="debug" style="background: #e3f2fd; padding: 10px; margin: 10px; font-size: 12px;">';
-    // echo 'Найдено объектов с сервисами: ' . count($serviceInfo) . '<br>';
-    // if (count($serviceInfo) > 0) {
-        // $first = reset($serviceInfo);
-        // echo 'Пример: object_id=' . key($serviceInfo) . ', дата=' . $first['last_service'] . ', результат=' . $first['last_result'];
-    // }
-    // echo '</div>';
-    
 } catch (Exception $e) {
-    // echo '<div class="error" style="background: #ffd5d5; padding: 10px; margin: 10px;">';
-    // echo 'Ошибка получения сервисов: ' . $e->getMessage();
-    // echo '</div>';
+    // Ignored in favor of an empty service summary for the current month.
 }
 ?>
 
@@ -378,21 +371,21 @@ try {
                         style="text-wrap-mode: nowrap;"><?php echo htmlspecialchars($row['model'] ?? ''); ?>
                     </td>
 
-                    <!-- Колонка ТЕЛЕФОН -->
+                    <!-- Телефон ответственного из договора -->
                     <td>
-                        <!-- <?php if (!empty($row['phone'])): ?> -->
-                            <?php $phone = preg_replace('/[^0-9]/', '', $row['phone']);?>
+                        <?php if (!empty($row['dogovor_responsible_phone'])): ?>
+                            <?php $phone = preg_replace('/[^0-9]/', '', $row['dogovor_responsible_phone']); ?>
                             <a href="tel:+<?php echo $phone; ?>" class="phone-link">
-                                <?php echo htmlspecialchars($row['phone']); ?>
+                                <?php echo htmlspecialchars($row['dogovor_responsible_phone']); ?>
                             </a>
-                        <!-- <?php else: ?>
+                        <?php else: ?>
                             <span class="no-phone">нет телефона</span>
-                        <?php endif; ?> -->
+                        <?php endif; ?>
                     </td>
 
-                    <!-- Колонка ИМЯ -->
-                    <td onclick="openEditModal(<?php echo htmlspecialchars(json_encode($row)); ?>)">
-                        <?php echo htmlspecialchars($row['name'] ?? ''); ?>
+                    <!-- Имя ответственного из договора -->
+                    <td>
+                        <?php echo htmlspecialchars($row['dogovor_responsible_name'] ?? ''); ?>
                     </td>
 
                     <!-- Колонка с Действиями -->
@@ -462,14 +455,6 @@ function updateTableRow(data) {
             `<a href="https://yandex.ru/maps/?text=${encodeURIComponent(data.address)}" target="_blank" class="address-link">${data.address}</a>` : 
             '<span class="no-address">нет адреса</span>';
         row.cells[3].textContent = data.model || '';
-        if (data.phone) {
-            const cleanPhone = data.phone.replace(/\D/g, '');
-            row.cells[4].innerHTML = `<a href="tel:+${cleanPhone}" class="phone-link">${data.phone}</a>`;
-        } else {
-            row.cells[4].innerHTML = '<span class="no-phone">нет телефона</span>';
-        }
-        row.cells[5].textContent = data.name || '';
-
         // Обновляем кнопку редактирования с новыми данными
         const editButton = row.querySelector('.edit-btn');
         if (editButton) {
