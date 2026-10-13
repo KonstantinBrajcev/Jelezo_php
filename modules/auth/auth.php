@@ -1,5 +1,7 @@
 <?php
 // modules/auth/auth.php
+require_once __DIR__ . '/../../includes/config.php';
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -14,47 +16,36 @@ if (!defined('DB_PATH')) {
  * Проверяет авторизацию пользователя и перенаправляет в зависимости от роли
  */
 function checkAuth() {
-    global $databaseFile;
-    // Проверяем, авторизован ли пользователь
     if (!isset($_SESSION['user_id'])) {
-        // Сохраняем URL, на который пытался зайти пользователь
         $_SESSION['return_url'] = $_SERVER['REQUEST_URI'];
         header('Location: /modules/auth/login.php');
         exit();
     }
-    
-    // Проверяем существование пользователя в БД
+
     try {
-        $pdo = new PDO("sqlite:" . DB_PATH);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo = getDbConnection();
         $stmt = $pdo->prepare("SELECT id, is_staff, is_superuser, dogovor FROM auth_user WHERE id = ? AND is_active = 1");
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if (!$user) {
-            // Пользователь не найден или неактивен
             session_destroy();
             header('Location: /modules/auth/login.php?error=session_expired');
             exit();
         }
-        
-        // Сохраняем информацию о пользователе в сессии
+
         $_SESSION['is_staff'] = $user['is_staff'] ?? 0;
         $_SESSION['is_superuser'] = $user['is_superuser'] ?? 0;
         $_SESSION['dogovor_id'] = $user['dogovor'] ?? null;
-        
-        // Если пользователь is_staff = 0, перенаправляем на гостевую страницу
-        // (кроме случаев, когда он уже на гостевой странице или странице входа)
+
         $currentPage = basename($_SERVER['PHP_SELF']);
         if ($user['is_staff'] == 0 && $currentPage != 'guest.php' && $currentPage != 'login.php') {
             header('Location: /guest.php');
             exit();
         }
-        
+
         return $user;
-        
     } catch (PDOException $e) {
-        // В случае ошибки БД перенаправляем на логин
         session_destroy();
         header('Location: /modules/auth/login.php?error=db_error');
         exit();
@@ -69,20 +60,18 @@ function checkPageAccess() {
     if (!isset($_SESSION['user_id'])) {
         return false;
     }
-    
+
     $currentPage = basename($_SERVER['PHP_SELF']);
     $isStaff = $_SESSION['is_staff'] ?? 0;
-    
-    // Если пользователь не является сотрудником (is_staff = 0)
+
     if ($isStaff == 0) {
-        // Разрешаем доступ только к guest.php и странице выхода
         $allowedPages = ['guest.php', 'logout.php', 'login.php'];
         if (!in_array($currentPage, $allowedPages)) {
             header('Location: /guest.php');
             exit();
         }
     }
-    
+
     return true;
 }
 
@@ -90,19 +79,17 @@ function checkPageAccess() {
  * Проверяет, является ли пользователь superuser
  * Если нет - перенаправляет на страницу с access_denied */
 function checkSuperuser() {
-    global $databaseFile;
     if (!isset($_SESSION['user_id'])) {
         header('Location: /modules/auth/login.php');
         exit();
     }
+
     try {
-        $pdo = new PDO("sqlite:" . DB_PATH);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo = getDbConnection();
         $stmt = $pdo->prepare("SELECT is_superuser FROM auth_user WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$user || $user['is_superuser'] != 1) {
-            // Пользователь не суперпользователь
             header('Location: /modules/admin/access_denied.php');
             exit();
         }
@@ -116,13 +103,12 @@ function checkSuperuser() {
 
 /** Получает информацию о текущем пользователе */
 function getCurrentUser() {
-    global $databaseFile;
     if (!isset($_SESSION['user_id'])) {
         return null;
     }
+
     try {
-        $pdo = new PDO("sqlite:" . DB_PATH);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo = getDbConnection();
         $stmt = $pdo->prepare("SELECT id, username, email, first_name, last_name, is_superuser, is_staff, is_active, dogovor FROM auth_user WHERE id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -137,27 +123,21 @@ function getCurrentUser() {
  * @param string $password Пароль пользователя
  * @return array|false Массив с данными пользователя или false при ошибке */
 function verifyUserCredentials($username, $password) {
-    global $databaseFile;
     try {
-        $pdo = new PDO("sqlite:" . DB_PATH);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        // Ищем пользователя
+        $pdo = getDbConnection();
         $stmt = $pdo->prepare("SELECT id, pass, is_active, is_staff, dogovor FROM auth_user WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if (!$user) {
-            return false; // Пользователь не найден
+            return false;
         }
-        
-        // Проверяем активность пользователя
+
         if (!$user['is_active']) {
-            return false; // Пользователь неактивен
+            return false;
         }
-        
-        // Проверяем пароль с помощью password_verify
+
         if (password_verify($password, $user['pass'])) {
-            // Пароль верный
             return [
                 'id' => $user['id'],
                 'username' => $username,
@@ -165,7 +145,8 @@ function verifyUserCredentials($username, $password) {
                 'dogovor_id' => $user['dogovor'] ?? null
             ];
         }
-        return false; // Неверный пароль
+
+        return false;
     } catch (PDOException $e) {
         error_log("Ошибка проверки учетных данных: " . $e->getMessage());
         return false;
@@ -174,10 +155,8 @@ function verifyUserCredentials($username, $password) {
 
 /* Обновляет время последнего входа пользователя */
 function updateLastLogin($userId) {
-    global $databaseFile;
     try {
-        $pdo = new PDO("sqlite:" . DB_PATH);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo = getDbConnection();
         $stmt = $pdo->prepare("UPDATE auth_user SET last_login = datetime('now') WHERE id = ?");
         $stmt->execute([$userId]);
         return true;
@@ -193,14 +172,10 @@ function updateLastLogin($userId) {
  * @param array $additionalData Дополнительные данные (email, first_name и т.д.)
  * @return int|false ID нового пользователя или false при ошибке */
 function createUser($username, $password, $additionalData = []) {
-    global $databaseFile;
     try {
-        $pdo = new PDO("sqlite:" . DB_PATH);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        // Хешируем пароль
+        $pdo = getDbConnection();
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        
-        // Подготавливаем данные для вставки
+
         $defaultData = [
             'username' => $username,
             'pass' => $hashedPassword,
@@ -210,8 +185,7 @@ function createUser($username, $password, $additionalData = []) {
             'date_joined' => date('Y-m-d H:i:s')
         ];
         $data = array_merge($defaultData, $additionalData);
-        
-        // Формируем SQL запрос
+
         $columns = implode(', ', array_keys($data));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
         $stmt = $pdo->prepare("INSERT INTO auth_user ($columns) VALUES ($placeholders)");
@@ -225,7 +199,6 @@ function createUser($username, $password, $additionalData = []) {
 
 /** Проверяет, является ли пароль валидным (безопасным) */
 function isPasswordValid($password) {
-    // Минимальная длина пароля
     if (strlen($password) < 6) {
         return false;
     }
@@ -234,10 +207,8 @@ function isPasswordValid($password) {
 
 /** Проверяет, существует ли пользователь с таким логином */
 function userExists($username) {
-    global $databaseFile;
     try {
-        $pdo = new PDO("sqlite:" . DB_PATH);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo = getDbConnection();
         $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM auth_user WHERE username = ?");
         $stmt->execute([$username]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);

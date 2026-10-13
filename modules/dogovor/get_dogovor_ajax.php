@@ -2,6 +2,8 @@
 // modules/dogovor/get_dogovor_ajax.php
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../modules/auth/auth.php';
+checkAuth();
+checkSuperuser();
 
 // Проверяем, что запрос GET и есть ID
 if ($_SERVER['REQUEST_METHOD'] !== 'GET' || !isset($_GET['id'])) {
@@ -11,8 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET' || !isset($_GET['id'])) {
 $id = (int)$_GET['id'];
 
 try {
-    $db = new PDO('sqlite:' . DB_PATH);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = getDbConnection();
+    ensureDogovorContactColumns($db);
     
     // Получаем данные договора
     $stmt = $db->prepare("SELECT * FROM LIFTEH_dogovor WHERE id = ?");

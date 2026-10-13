@@ -16,7 +16,7 @@ try {
     // Получаем данные из POST
     $problem = trim($_POST['problem'] ?? '');
     $object_id = intval($_POST['object_id'] ?? 0);
-    $user_id = intval($_POST['user_id'] ?? 0);
+    $user_id = (int) ($_SESSION['user_id'] ?? 0);
     $result = trim($_POST['result'] ?? '');
     $works = $_POST['works'] ?? [];
     
@@ -48,8 +48,7 @@ try {
         }
     }
     
-    $db = new PDO('sqlite:' . DB_PATH);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = getDbConnection();
     
     // Начинаем транзакцию
     $db->beginTransaction();

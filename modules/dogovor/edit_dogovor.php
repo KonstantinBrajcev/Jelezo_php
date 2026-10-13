@@ -8,7 +8,7 @@ $financingOptions = [
 
 
 
-<form id="editDogovorForm" method="POST" action="/../../modules/dogovor/edit_dogovor_ajax.php">
+<form id="editDogovorForm" method="POST" action="/modules/dogovor/edit_dogovor_ajax.php">
     <input type="hidden" id="edit_id" name="id">
     <div class="modal-header">
         <h5 class="modal-title" id="editDogovorModalLabel">Редактирование договора</h5>
@@ -27,6 +27,21 @@ $financingOptions = [
             <div class="col-md-6 form-group form-floating">
                 <input type="text" class="form-control" id="edit_number" name="number" required>
                 <label for="edit_number" class="form-label">Номер договора</label>
+            </div>
+
+            <div class="col-md-6">
+                <label for="edit_responsible_name" class="form-label">Ответственное лицо</label>
+                <input type="text" class="form-control" id="edit_responsible_name" name="responsible_name" maxlength="255">
+            </div>
+
+            <div class="col-md-6">
+                <label for="edit_responsible_phone" class="form-label">Телефон ответственного лица</label>
+                <input type="tel" class="form-control" id="edit_responsible_phone" name="responsible_phone" maxlength="50">
+            </div>
+
+            <div class="col-md-6">
+                <label for="edit_responsible_email" class="form-label">E-mail ответственного лица</label>
+                <input type="email" class="form-control" id="edit_responsible_email" name="responsible_email" maxlength="254">
             </div>
 
 

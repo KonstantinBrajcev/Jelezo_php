@@ -2,8 +2,7 @@
 // add_avr.php - ТОЛЬКО HTML форма
 // Получаем список объектов для выпадающего списка
 try {
-    $db = new PDO('sqlite:' . DB_PATH);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = getDbConnection();
     
     // Получаем список объектов
     $sql_objects = "SELECT id, customer, address FROM LIFTEH_object ORDER BY customer, address";
@@ -11,7 +10,8 @@ try {
     $objects_list = $stmt_objects->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $objects_list = [];
-}?>
+}
+?>
 
 
 <div class="modal-header">
@@ -24,7 +24,7 @@ try {
     
 
 
-    <form id="addAvrForm" action="/../../modules/avr/add_avr_handler.php" method="POST">
+    <form id="addAvrForm" action="/modules/avr/add_avr_handler.php" method="POST">
 
         <div class="mb-3 form-group form-floating">
             <select class="form-control" id="object_id" name="object_id" required>
@@ -48,7 +48,7 @@ try {
         <div id="works-container">
             <div class="work-item mb-2 p-1 border rounded">
                 <div class="mb-2" style="height: 0px;">
-                    <button type="button" class="btn btn-danger remove-work" style="display: block; 
+                    <button type="button" class="btn btn-danger remove-work" style="display: block;
                     position: relative; justify-self: end; right: -10px; top: -10px; z-index: 1;">
                     &times;</button>
                 </div>
@@ -117,7 +117,23 @@ try {
 
 
 <script>
-let workCounter = 1;
+let workCounter = 0;
+
+function resetAddAvrForm() {
+    const form = $('#addAvrForm')[0];
+    if (!form) {
+        return;
+    }
+
+    form.reset();
+    $('#works-container .work-item').not(':first').remove();
+    $('#works-container .work-item').first().find('.work-name').attr('name', 'works[0][work_name]');
+    $('#works-container .work-item').first().find('.work-quantity').attr('name', 'works[0][quantity]');
+    $('#works-container .work-item').first().find('.work-unit').attr('name', 'works[0][unit]');
+    $('#works-container .remove-work').hide();
+    $('#addErrorAlert, #addSuccessAlert').addClass('d-none').text('');
+    workCounter = 0;
+}
 
 $(document).ready(function() {
     // Добавление новой работы
@@ -156,36 +172,35 @@ $(document).ready(function() {
         $('#works-container').append(newWorkHtml);
         
         // Показываем кнопку удаления у первого блока, если она скрыта
-        if ($('.remove-work:visible').length === 0) {
-            $('.remove-work').first().show();
+        if ($('#works-container .remove-work:visible').length === 0) {
+            $('#works-container .remove-work').first().show();
         }
     });
     
     // Удаление работы
-    $(document).on('click', '.remove-work', function() {
+    $(document).on('click', '#works-container .remove-work', function() {
         $(this).closest('.work-item').remove();
-        workCounter--;
         
         // Перенумеровываем оставшиеся блоки
-        $('.work-item').each(function(index) {
-            const newNumber = index + 1;
-            $(this).find('strong').text(`Работа №${newNumber}`);
-            
+        $('#works-container .work-item').each(function(index) {
             // Обновляем name атрибуты
             $(this).find('.work-name').attr('name', `works[${index}][work_name]`);
             $(this).find('.work-quantity').attr('name', `works[${index}][quantity]`);
             $(this).find('.work-unit').attr('name', `works[${index}][unit]`);
         });
+        workCounter = $('#works-container .work-item').length - 1;
         
         // Скрываем кнопку удаления, если остался только один блок
-        if ($('.work-item').length === 1) {
-            $('.remove-work').hide();
+        if ($('#works-container .work-item').length === 1) {
+            $('#works-container .remove-work').hide();
         }
     });
     
     // Скрываем кнопку удаления у первого блока, если он один
-    if ($('.work-item').length === 1) {
-        $('.remove-work').hide();
+    if ($('#works-container .work-item').length === 1) {
+        $('#works-container .remove-work').hide();
     }
+
+    $('#addAvrModal .close-modal, #addAvrModal .cancel-btn').on('click', resetAddAvrForm);
 });
 </script>
