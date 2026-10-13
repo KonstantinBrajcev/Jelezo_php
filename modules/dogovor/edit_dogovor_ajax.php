@@ -1,6 +1,9 @@
 <?php
 // edit_dogovor_ajax.php
 require_once __DIR__ . '/../../includes/config.php';
+require_once __DIR__ . '/../../modules/auth/auth.php';
+checkAuth();
+checkSuperuser();
 
 
 // Проверяем, что запрос POST
@@ -16,8 +19,8 @@ if (!isset($_POST['id'])) {
 $id = (int)$_POST['id'];
 
 try {
-    $db = new PDO('sqlite:' . DB_PATH);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = getDbConnection();
+    ensureDogovorContactColumns($db);
     
     // Проверяем существование договора
     $stmt = $db->prepare("SELECT id FROM LIFTEH_dogovor WHERE id = ?");
@@ -30,6 +33,9 @@ try {
     // Получаем данные из POST запроса
     $customer = trim($_POST['customer'] ?? '');
     $number = trim($_POST['number'] ?? '');
+    $responsibleName = trim($_POST['responsible_name'] ?? '');
+    $responsiblePhone = trim($_POST['responsible_phone'] ?? '');
+    $responsibleEmail = trim($_POST['responsible_email'] ?? '');
     $financing = trim($_POST['financing'] ?? '');
     // $prolong = (int)($_POST['prolong'] ?? '');
     $prolong = isset($_POST['prolong']) ? (int)$_POST['prolong'] : 1;
@@ -55,6 +61,11 @@ try {
     if (empty($number)) $errors[] = 'Номер договора обязателен';
     if (empty($date)) $errors[] = 'Дата договора обязательна';
     if (empty($validate)) $errors[] = 'Срок действия договора обязателен';
+    if (strlen($responsibleName) > 255) $errors[] = 'Имя ответственного лица должно содержать не более 255 символов';
+    if (strlen($responsiblePhone) > 50) $errors[] = 'Телефон ответственного лица должен содержать не более 50 символов';
+    if (strlen($responsibleEmail) > 254 || ($responsibleEmail !== '' && !filter_var($responsibleEmail, FILTER_VALIDATE_EMAIL))) {
+        $errors[] = 'Укажите корректный e-mail ответственного лица (не более 254 символов)';
+    }
     
     if (empty($errors)) {
         // Проверка уникальности номера (кроме текущего)
@@ -73,6 +84,9 @@ try {
     $sql = "UPDATE LIFTEH_dogovor SET 
             customer = ?, 
             number = ?, 
+            responsible_name = ?,
+            responsible_phone = ?,
+            responsible_email = ?,
             financing = ?, 
             prolong = ?, 
             date = ?, 
@@ -88,7 +102,10 @@ try {
     $stmt = $db->prepare($sql);
     $stmt->execute([
         $customer, 
-        $number, 
+        $number,
+        $responsibleName,
+        $responsiblePhone,
+        $responsibleEmail,
         $financing, 
         $prolong, 
         $date,

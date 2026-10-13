@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../modules/auth/auth.php';
 checkAuth();
 
 $currentUser = getCurrentUser();
+$isSuperAdmin = ($currentUser['is_superuser'] ?? 0) == 1;
 
 // ПОДКЛЮЧЕНИЕ К БД SQLite3
 try {
@@ -114,75 +115,7 @@ if ($isAjax) {
 <?php $pageTitle = 'Документы'; include __DIR__ . '/../../includes/header.php'; ?>
 
 <style>
-    /* Стили для закладок */
-    .tabs-container {
-        margin-bottom: 20px;
-    }
-    
-    .tabs {
-        display: flex;
-        gap: 5px;
-        border-bottom: 2px solid #ddd;
-        padding-bottom: 0;
-        flex-wrap: wrap;
-    }
-    
-    .tab-btn {
-        padding: 10px 20px;
-        background: #f5f5f5;
-        border: none;
-        border-radius: 5px 5px 0 0;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        color: #555;
-        transition: all 0.3s;
-        position: relative;
-    }
-    
-    .tab-btn:hover {
-        background: #e8e8e8;
-    }
-    
-    .tab-btn.active {
-        background: #4CAF50;
-        color: white;
-    }
-    
-    .tab-btn .badge {
-        background: #ff6b6b;
-        color: white;
-        border-radius: 50%;
-        padding: 2px 8px;
-        font-size: 12px;
-        margin-left: 5px;
-    }
-    
-    .tab-btn.active .badge {
-        background: white;
-        color: #4CAF50;
-    }
-    
-    .tab-content {
-        display: none;
-        animation: fadeIn 0.3s ease;
-    }
-    
-    .tab-content.active {
-        display: block;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 40px;
-        color: #999;
-        font-size: 16px;
-    }
+
 </style>
 
 <body>
@@ -190,9 +123,41 @@ if ($isAjax) {
 
     <div class="container">
         <div class="document-header">
-            <div>
+            <div class="button-group">
+                <a href="/map.php" class="map-button">
+                    <span class="button-text">Карта</span>
+                    <i class="fas fa-map"></i>
+                </a>
+
+                <a href="/index.php" class="map-button">
+                    <span class="button-text">Таблица</span>
+                    <i class="fas fa-table"></i>
+                </a>
+
+                <a href="/problem.php" class="map-button">
+                    <span class="button-text">Проблемы</span>
+                    <i class="fas fa-list"></i>
+                </a>
+
+                <?php if ($isSuperAdmin): ?>
+                    <a href="/dogovor.php" class="map-button">
+                        <span class="button-text">Договора</span>
+                        <i class="fas fa-file-alt"></i>
+                    </a>
+
+                    <a href="/charts.php" class="map-button">
+                        <span class="button-text">Графики</span>
+                        <i class="fas fa-chart-line"></i>
+                    </a>
+
+                    <a href="/avr.php" class="map-button">
+                        <span class="button-text">АВР</span>
+                        <i class="fa-solid fa-gear"></i>
+                    </a>
+                <?php endif; ?>
+
                 <button class="add-document-btn" onclick="openModal()">
-                    <i class="fas fa-plus"></i> Добавить
+                    <i class="fas fa-plus"></i>
                 </button>
             </div>
         </div>
@@ -238,9 +203,9 @@ if ($isAjax) {
                                         <a href="<?= htmlspecialchars($doc['link']) ?>" target="_blank" class="document-link">
                                             <i class="fas fa-file-pdf"></i>
                                         </a>
-                                        <button style="margin-left: 5px;" class="delete-btn" onclick="deleteDocument(<?= $doc['id'] ?>)">
+                                        <!-- <button style="margin-left: 5px;" class="delete-btn" onclick="deleteDocument(<?= $doc['id'] ?>)">
                                             <i class="fas fa-trash"></i>
-                                        </button>
+                                        </button> -->
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

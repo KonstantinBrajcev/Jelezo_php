@@ -21,8 +21,7 @@ try {
     
     $id = intval($_GET['id']);
     
-    $db = new PDO('sqlite:' . DB_PATH);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = getDbConnection();
     
     // Получаем основную информацию о записи
     $sql = "SELECT a.*, o.customer, o.address 

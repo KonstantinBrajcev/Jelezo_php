@@ -136,6 +136,11 @@ try {
                     <i class="fas fa-list"></i>
                 </a>
 
+                <a href="/document.php" class="map-button">
+                    <span class="button-text">Документы</span>
+                    <i class="fas fa-folder-open"></i>
+                </a>
+
                 <a href="/dogovor.php" class="map-button">
                     <span class="button-text">Договора</span>
                     <i class="fas fa-chart-line"></i>

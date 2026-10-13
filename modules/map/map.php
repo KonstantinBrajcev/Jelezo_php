@@ -18,11 +18,18 @@ try {
     $pdo = new PDO("sqlite:" . DB_PATH);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    $activeDogovorFilter = "NOT EXISTS (
+        SELECT 1
+        FROM LIFTEH_dogovor inactive_dogovor
+        WHERE inactive_dogovor.id = o.dogovor_id
+          AND inactive_dogovor.is_active = 0
+    )";
 
     // 1. Общее количество объектов в текущем месяце
     $sqlTotal = "SELECT COUNT(*) as total 
                 FROM LIFTEH_object o
-                WHERE o.$monthColumn IS NOT NULL 
+                WHERE $activeDogovorFilter
+                    AND o.$monthColumn IS NOT NULL
                     AND o.$monthColumn != '' 
                     AND CAST(o.$monthColumn AS TEXT) != '0' ";
     
@@ -35,7 +42,8 @@ try {
     $sqlCompleted = "SELECT COUNT(DISTINCT s.object_id) as completed 
         FROM LIFTEH_service s
         INNER JOIN LIFTEH_object o ON s.object_id = o.id
-        WHERE o.$monthColumn IS NOT NULL 
+        WHERE $activeDogovorFilter
+            AND o.$monthColumn IS NOT NULL
             AND o.$monthColumn != '' 
             AND CAST(o.$monthColumn AS TEXT) != '0'
             AND strftime('%Y-%m', s.service_date) = strftime('%Y-%m', 'now')";
@@ -57,7 +65,8 @@ try {
                 ) last_service ON s.object_id = last_service.object_id 
                     AND s.service_date = last_service.max_date
                 INNER JOIN LIFTEH_object o ON s.object_id = o.id
-                WHERE o.$monthColumn IS NOT NULL 
+                WHERE $activeDogovorFilter
+                    AND o.$monthColumn IS NOT NULL
                     AND o.$monthColumn != '' 
                     AND CAST(o.$monthColumn AS TEXT) != '0'
                     AND strftime('%Y-%m', s.service_date) = strftime('%Y-%m', 'now')
@@ -85,7 +94,8 @@ try {
             FROM LIFTEH_object o
             LEFT JOIN LIFTEH_service s ON o.id = s.object_id 
                 AND strftime('%Y-%m', s.service_date) = strftime('%Y-%m', 'now')
-            WHERE o.$monthColumn IS NOT NULL 
+            WHERE $activeDogovorFilter
+                AND o.$monthColumn IS NOT NULL
                 AND o.$monthColumn != '' 
                 AND CAST(o.$monthColumn AS TEXT) != '0'
                 AND s.id IS NULL ";

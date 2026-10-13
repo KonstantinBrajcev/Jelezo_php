@@ -193,6 +193,10 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
                     <i class="fas fa-table"></i>
                 </a>
 
+                <a href="/document.php" class="map-button">
+                    <span class="button-text">Документы</span>
+                    <i class="fas fa-folder-open"></i>
+                </a>
 
                 <!-- ТОЛЬКО ДЛЯ АДМИНОВ -->
                 <?php if ($isSuperAdmin): ?>

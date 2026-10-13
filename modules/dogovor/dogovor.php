@@ -8,8 +8,8 @@ checkSuperuser(); // Только для суперпользователей!
 $currentUser = getCurrentUser();
 
 try {
-    $db = new PDO('sqlite:' . DB_PATH);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db = getDbConnection();
+    ensureDogovorContactColumns($db);
     
     // Получаем данные из таблицы
     $sql = "SELECT * FROM LIFTEH_dogovor ORDER BY is_active DESC, CAST(number AS INTEGER)";
@@ -120,6 +120,11 @@ try {
                     <i class="fas fa-list"></i>
                 </a>
 
+                <a href="/document.php" class="map-button">
+                    <span class="button-text">Документы</span>
+                    <i class="fas fa-folder-open"></i>
+                </a>
+
                 <a href="/charts.php" class="map-button">
                     <span class="button-text">Графики</span>
                     <i class="fas fa-chart-line"></i>
@@ -163,7 +168,7 @@ try {
                             <th>Клиент</th>
                             <th>Дата</th>
                             <th>Срок</th>
-                            <th></th>
+                            <th>Статус и условия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -179,7 +184,7 @@ try {
                             }
                             // none_done и no_objects - без выделения
                             ?>
-                            <tr class="edit-dogovor <?= $rowClass ?>" data-id="<?= $dogovor['id'] ?>">
+                            <tr class="edit-dogovor <?= $rowClass ?>" data-id="<?= htmlspecialchars((string) $dogovor['id'], ENT_QUOTES, 'UTF-8') ?>">
                                 <td><strong><?= htmlspecialchars($dogovor['number']) ?></strong></td>
                                 <td><?= htmlspecialchars($dogovor['customer']) ?></td>
                                 <td><?= date('d.m.Y', strtotime($dogovor['date'])) ?></td>
@@ -231,7 +236,7 @@ try {
                                 $rowClass = 'service-status-partial';
                             }
                             ?>
-                            <tr class="edit-dogovor <?= $rowClass ?> inactive-row" data-id="<?= $dogovor['id'] ?>">
+                            <tr class="edit-dogovor <?= $rowClass ?> inactive-row" data-id="<?= htmlspecialchars((string) $dogovor['id'], ENT_QUOTES, 'UTF-8') ?>">
                                 <td><strong><?= htmlspecialchars($dogovor['number']) ?></strong></td>
                                 <td><?= htmlspecialchars($dogovor['customer']) ?></td>
                                 <td><?= date('d.m.Y', strtotime($dogovor['date'])) ?></td>
@@ -302,7 +307,10 @@ try {
         
         $(document).ready(function() {
             // Открытие модального окна редактирования
-            $('.edit-dogovor').click(function() {
+            $('.edit-dogovor').click(function(event) {
+                if ($(event.target).closest('a, button').length) {
+                    return;
+                }
                 const id = $(this).data('id');
                 loadDogovorData(id);
             });
@@ -310,7 +318,7 @@ try {
             // Загрузка данных договора для редактирования
             function loadDogovorData(id) {
                 $.ajax({
-                    url: '/../../modules/dogovor/get_dogovor_ajax.php',
+                    url: '/modules/dogovor/get_dogovor_ajax.php',
                     type: 'GET',
                     data: { id: id },
                     dataType: 'json',
@@ -322,6 +330,9 @@ try {
                             $('#edit_id').val(response.data.id);
                             $('#edit_customer').val(response.data.customer);
                             $('#edit_number').val(response.data.number);
+                            $('#edit_responsible_name').val(response.data.responsible_name || '');
+                            $('#edit_responsible_phone').val(response.data.responsible_phone || '');
+                            $('#edit_responsible_email').val(response.data.responsible_email || '');
                             $('#edit_date').val(response.data.date);
                             $('#edit_validate').val(response.data.validate);
                             $('#edit_is_active').prop('checked', response.data.is_active == 1);

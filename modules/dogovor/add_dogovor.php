@@ -25,6 +25,21 @@ $financingOptions = [
                 <label for="number" class="form-label">Номер договора *</label>
                 <input type="text" class="form-control" id="number" name="number" required>
             </div>
+
+            <div class="col-md-6">
+                <label for="responsible_name" class="form-label">Ответственное лицо</label>
+                <input type="text" class="form-control" id="responsible_name" name="responsible_name" maxlength="255">
+            </div>
+
+            <div class="col-md-6">
+                <label for="responsible_phone" class="form-label">Телефон ответственного лица</label>
+                <input type="tel" class="form-control" id="responsible_phone" name="responsible_phone" maxlength="50">
+            </div>
+
+            <div class="col-md-6">
+                <label for="responsible_email" class="form-label">E-mail ответственного лица</label>
+                <input type="email" class="form-control" id="responsible_email" name="responsible_email" maxlength="254">
+            </div>
             
             <!-- Финансирование как radio-кнопки -->
             <div class="col-md-3">
@@ -147,6 +162,4 @@ $financingOptions = [
         </div>
     </div>
 </form>
-
-
 
