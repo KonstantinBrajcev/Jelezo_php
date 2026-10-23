@@ -22,7 +22,7 @@ jobs:
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
           protocol: ftp
           security: loose
-          timeout: 60000
+          timeout: 100000
           exclude: |
             assets/uploads/
             assets/uploads/**
