@@ -9,10 +9,10 @@ h1 {
     margin-bottom: 30px;
 }
 
-table {
+.table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    margin: 0px 0px 0px 0px;
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
