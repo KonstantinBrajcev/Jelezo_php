@@ -11,6 +11,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Test FTP connectivity
+        run: |
+        curl -v --connect-timeout 20 ftp://${{ secrets.FTP_HOST }}/
       
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
