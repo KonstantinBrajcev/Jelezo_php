@@ -24,6 +24,8 @@ jobs:
           security: loose
           timeout: 60000
           exclude: |
+            assets/uploads/
+            assets/uploads/**
             .git
             .git/
             .git/**
