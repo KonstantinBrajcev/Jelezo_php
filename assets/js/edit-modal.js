@@ -11,8 +11,8 @@ function openEditModal(rowData) {
     document.getElementById('editAddress').value = rowData.address || '';
     document.getElementById('editModel').value = rowData.model || '';
     document.getElementById('editNumber').value = rowData.serial_number || '';
-    document.getElementById('editPhone').value = rowData.phone || '';
-    document.getElementById('editName').value = rowData.name || '';
+    document.getElementById('editPhone').value = rowData.dogovor_responsible_phone || '';
+    document.getElementById('editName').value = rowData.dogovor_responsible_name || '';
     document.getElementById('editLatitude').value = rowData.latitude || '';
     document.getElementById('editLongitude').value = rowData.longitude || '';
 

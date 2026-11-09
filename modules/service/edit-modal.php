@@ -34,12 +34,12 @@
             
             <div class="d-flex flex-nowrap gap-2">
                 <div class="form-group form-floating  flex-fill">
-                    <input type="text" class="form-control" id="editPhone" name="phone">
+                    <input type="text" class="form-control" id="editPhone" name="phone" readonly>
                     <label for="editPhone">Телефон:</label>
                 </div>
                 
                 <div class="form-group form-floating  flex-fill">
-                    <input type="text" class="form-control" id="editName" name="name">
+                    <input type="text" class="form-control" id="editName" name="name" readonly>
                     <label for="editName">Имя:</label>
                 </div>
             </div>
