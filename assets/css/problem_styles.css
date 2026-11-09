@@ -240,6 +240,39 @@ input[type="number"] {
     color: #999;
 }
 
+
+/* Стили для аккордеона */
+.accordion-row td {
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+}
+
+.accordion-row td:hover {
+    background-color: #e9ecef;
+}
+
+.accordion-row td i {
+    transition: transform 0.3s ease;
+    margin-right: 8px;
+}
+
+/* Анимация для завершенных задач */
+.completed-row {
+    transition: all 0.3s ease;
+}
+
+.completed-row td {
+    background-color: #fafafa;
+}
+
+/* Стиль для строки с завершенными задачами */
+#completedTasksBody tr:hover {
+    background-color: #f0f0f0;
+}
+
+
 /* Адаптивная таблица с постепенным скрытием колонок */
 @media (max-width: 1200px) {
 

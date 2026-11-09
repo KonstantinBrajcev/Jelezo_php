@@ -121,7 +121,7 @@ if ($isAjax) {
 <body>
     <?php include __DIR__ . '/../../modules/admin/user_panel.php'; ?>
 
-    <div class="container">
+    <div class="container-fluid">
         <div class="document-header">
             <div class="button-group">
                 <a href="/map.php" class="map-button">

@@ -43,7 +43,7 @@ try {
 
 <?php include __DIR__ . '/../../modules/admin/user_panel.php'; ?>
 
-<div class="container">
+<div class="container-fluid">
     <div>
         <div class="controls">
             <!-- БЛОК С КНОПКАМИ -->
@@ -101,7 +101,7 @@ try {
                         <!-- <th>Ед. изм.</th> -->
                         <!-- <th>User</th> -->
                         <th>Статус</th>
-                        <th>Действия</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>

@@ -141,44 +141,12 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
 <?php $pageTitle = 'Управление проблемами'; include __DIR__ . '/../../includes/header.php'; ?>
 <body>
 
-<style>
-/* Стили для аккордеона */
-.accordion-row td {
-    background-color: #f8f9fa;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    user-select: none;
-}
-
-.accordion-row td:hover {
-    background-color: #e9ecef;
-}
-
-.accordion-row td i {
-    transition: transform 0.3s ease;
-    margin-right: 8px;
-}
-
-/* Анимация для завершенных задач */
-.completed-row {
-    transition: all 0.3s ease;
-}
-
-.completed-row td {
-    background-color: #fafafa;
-}
-
-/* Стиль для строки с завершенными задачами */
-#completedTasksBody tr:hover {
-    background-color: #f0f0f0;
-}
-</style>
 
 <!-- Панель пользователя -->
 <?php include __DIR__ . '/../../modules/admin/user_panel.php'; ?>
 
 
-    <div class="container">
+    <div class="container-fluid">
 
         <div class="controls">
             <div class="button-group">

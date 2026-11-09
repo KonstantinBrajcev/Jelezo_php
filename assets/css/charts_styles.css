@@ -69,6 +69,15 @@
 }
 
 
+.work-matrix-table td {
+    background-color: #ffffff; /* белый по умолчанию */
+}
+.work-matrix-table td.work-yes {
+    background-color: #c8e6c9; /* светло-зелёный */
+    color: #1b5e20;
+    font-weight: bold;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
   .stats-card {
@@ -80,4 +89,19 @@
     height: 50px;
     font-size: 20px;
   }
+}
+
+/* Вертикальный текст для месяцев на узких экранах */
+@media (max-width: 1050px) {
+    .work-matrix-table th.month-col {
+        writing-mode: vertical-rl;      /* текст поворачивается вертикально */
+        transform: rotate(180deg);       /* чтобы читалось сверху вниз */
+        text-orientation: mixed;         /* буквы не поворачиваются */
+        white-space: nowrap;
+        min-width: 32px !important;      /* колонка становится узкой */
+        padding: 4px 2px;
+        font-size: 0.8rem;
+        vertical-align: bottom;
+        height: 110px;                   /* высота под вертикальный текст */
+    }
 }

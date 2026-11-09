@@ -104,6 +104,45 @@ try {
     // 5. Общая сумма за год
     $yearTotal = array_sum($monthlyTotals);
 
+
+    // 6. Матрица работ по месяцам для каждого заказчика
+    // Используем LIFTEH_dogovor.customer (как вы указали), а не LIFTEH_object.customer
+    $monthlyByCustomer = [];
+    $stmt = $db->query("
+        SELECT 
+            d.customer,
+            d.id AS dogovor_id,
+            o.M1, o.M2, o.M3, o.M4, o.M5, o.M6,
+            o.M7, o.M8, o.M9, o.M10, o.M11, o.M12
+        FROM LIFTEH_object o
+        INNER JOIN LIFTEH_dogovor d ON o.dogovor_id = d.id
+        WHERE d.is_active = 1
+          AND d.customer IS NOT NULL 
+          AND d.customer != ''
+        ORDER BY d.customer
+    ");
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Группируем по заказчику: для каждого месяца отмечаем, есть ли хотя бы одна ненулевая сумма
+    $matrix = []; // [customer => [month => bool]]
+    foreach ($rows as $row) {
+        $customer = $row['customer'];
+        if (!isset($matrix[$customer])) {
+            $matrix[$customer] = array_fill_keys($months, false);
+        }
+        foreach ($months as $m) {
+            $val = $row[$m];
+            // Считаем, что работа есть, если значение не NULL, не пустое и не равно 0
+            if ($val !== null && $val !== '' && (float)$val != 0) {
+                $matrix[$customer][$m] = true;
+            }
+        }
+    }
+    // Сортируем заказчиков по алфавиту
+    ksort($matrix);
+
+
+
 } catch (PDOException $e) {
     die("Ошибка подключения к базе данных: " . $e->getMessage());
 }
@@ -143,7 +182,7 @@ try {
 
                 <a href="/dogovor.php" class="map-button">
                     <span class="button-text">Договора</span>
-                    <i class="fas fa-chart-line"></i>
+                    <i class="fas fa-file"></i>
                 </a>
 
                 <a href="avr.php" class="map-button">
@@ -275,13 +314,13 @@ try {
                             <?php
                             // Данные о зарплате
                             $salaryData = [
-                                ['position' => 'Директор (Брайцев)', 'percent' => 12.9],
-                                ['position' => 'Маркетолог (Берсенева)', 'percent' => 11.5],
-                                ['position' => 'Гл. бухгалтер (Евтухова)', 'percent' => 9],
-                                ['position' => 'Электромеханик по подъемникам (Кравченко)', 'percent' => 8.7],
+                                ['position' => 'Директор (Брайцев)', 'percent' => 11.5],
+                                ['position' => 'Маркетолог (Берсенева)', 'percent' => 11.0],
+                                ['position' => 'Гл. бухгалтер (Евтухова)', 'percent' => 8],
+                                ['position' => 'Электромеханик по подъемникам (Кравченко)', 'percent' => 7.5],
                                 // ['position' => 'Электромеханик по подъемникам (Короткий)', 'percent' => 8],
-                                ['position' => 'Электромеханик по подъемникам (Гамалеев)', 'percent' => 3],
-                                ['position' => 'Автомеханик (Беликов)', 'percent' => 5]
+                                ['position' => 'Электромеханик по подъемникам (Гамалеев)', 'percent' => 2.5],
+                                ['position' => 'Автомеханик (Беликов)', 'percent' => 1]
                             ];
                             
                             // Рассчитываем среднемесячную сумму и фонд оплаты
@@ -308,7 +347,7 @@ try {
                             ?>
                             
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-lg-6">
                                     <table class="table table-bordered">
                                         <thead class="table-light">
                                             <tr>
@@ -363,7 +402,7 @@ try {
                                     </table>
                                 </div>
                                 
-                                <div class="col-md-6">
+                                <div class="col-lg-6">
                                     <div class="card bg-light">
                                         <div class="card-body">
                                             <h6 class="card-subtitle mb-2 text-muted">Информация</h6>
@@ -411,8 +450,8 @@ try {
                     <div class="card-body p-0">
                         <div class="table-responsive" style="max-height: 800px; overflow-y: auto;">
                             <table class="table table-hover mb-0">
-                                <thead>
-                                    <tr>
+                                <thead class="sticky-top bg-white">
+                                    <tr style="color: #ffffff;">
                                         <th>Заказчик</th>
                                         <th class="text-end" style="text-wrap-mode: nowrap;">Сумма, BYN</th>
                                     </tr>
@@ -431,6 +470,61 @@ try {
                 </div>
               </div>
             </div>
+
+
+
+<!-- Таблица выполняемых работ по месяцам по заказчикам -->
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Работы по месяцам</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style=" overflow-y: auto;">
+                    <table class="table table-bordered table-sm mb-0 work-matrix-table">
+                        <thead class="sticky-top bg-white" style="top: 0; z-index: 2;">
+                            <tr>
+                                <th style="min-width: 200px;">Заказчик</th>
+                                <?php foreach ($monthNames as $mn): ?>
+                                    <th class="text-center month-col" style="min-width: 50px;"><?= $mn ?></th>
+                                <?php endforeach; ?>
+                                <!-- <th class="text-center" style="min-width: 80px;">Итого мес.</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($matrix)): ?>
+                                <tr>
+                                    <td colspan="14" class="text-center text-muted py-3">Нет данных по активным договорам</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($matrix as $customer => $monthFlags): ?>
+                                    <?php $activeMonths = count(array_filter($monthFlags)); ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($customer) ?></td>
+                                        <?php foreach ($months as $m): ?>
+                                            <?php 
+                                                $hasWork = $monthFlags[$m] ?? false;
+                                                $cls = $hasWork ? 'work-yes' : 'work-no';
+                                                $title = $hasWork ? 'Есть работы' : 'Нет работ';
+                                            ?>
+                                            <td class="text-center <?= $cls ?>" title="<?= $title ?>">
+                                                <?= $hasWork ? '✓' : '—' ?>
+                                            </td>
+                                        <?php endforeach; ?>
+                                        <!-- <td class="text-center fw-bold"><?= $activeMonths ?></td> -->
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <div class="row g-4 mt-2">
     <!-- Типы оборудования (график) -->

@@ -123,21 +123,15 @@ try {
 ?>
 
 
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="ru">
 <?php $pageTitle = 'Список объектов'; include 'includes/header.php'; ?>
 <body>
 
-
 <?php include 'modules/admin/user_panel.php'; ?>
 
 
-    <div class="container">
+    <div class="container-fluid">
 
 
 
