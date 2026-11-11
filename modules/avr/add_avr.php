@@ -1,5 +1,6 @@
 <?php
 // add_avr.php - ТОЛЬКО HTML форма
+
 // Получаем список объектов для выпадающего списка
 try {
     $db = getDbConnection();
@@ -96,13 +97,6 @@ try {
             <label for="result" class="form-label">Результат</label>
         </div>
         
-
-        <div class="mb-3" hidden>
-            <label for="user_id" class="form-label">Пользователь <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="user_id" name="user_id" 
-                   value="<?= htmlspecialchars($currentUser['id']) ?>" readonly>
-        </div>
-
     </form>
 </div>
 <div class="modal-footer">
@@ -112,7 +106,6 @@ try {
         Сохранить
     </button>
 </div>
-
 
 
 

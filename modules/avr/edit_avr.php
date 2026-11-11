@@ -1,5 +1,6 @@
 <?php
 // edit_avr.php - ТОЛЬКО HTML форма
+
 // Получаем список объектов для выпадающего списка
 try {
     $db = getDbConnection();
@@ -69,11 +70,6 @@ try {
             <input type="datetime-local" class="form-control" id="edit_insert_date" name="insert_date">
         </div>
         
-        <div class="mb-3" hidden>
-            <label for="edit_user_id" class="form-label">Пользователь</label>
-            <input type="text" class="form-control" id="edit_user_id" name="user_id" 
-                   value="<?= htmlspecialchars($currentUser['id']) ?>" readonly>
-        </div>
     </form>
 </div>
 <div class="modal-footer">

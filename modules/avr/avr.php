@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../modules/auth/auth.php';
 checkAuth(); // Проверяем авторизацию
-checkSuperuser(); // Только для суперпользователей!
+// checkSuperuser(); // Только для суперпользователей!
 
 // Получаем информацию о текущем пользователе
 $currentUser = getCurrentUser();
@@ -23,8 +23,25 @@ try {
             LEFT JOIN LIFTEH_work w ON a.work_id = w.id
             LEFT JOIN LIFTEH_object o ON a.object_id = o.id 
             ORDER BY a.id DESC";
+
     $stmt = $db->query($sql);
-    $avr_records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $all_avr_records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Разделяем записи на активные и завершенные (Выполнено / Отложено / Отменено)
+    $active_records = [];
+    $archived_records = [];
+    
+    foreach ($all_avr_records as $record) {
+        // Считаем "архивными" те, что уже не требуют внимания
+        if (in_array($record['result'], ['Выполнено', 'Отложено', 'Отменено'])) {
+            $archived_records[] = $record;
+        } else {
+            $active_records[] = $record;
+        }
+    }
+    
+    // Общее количество для счетчика внизу
+    $total_records_count = count($all_avr_records);
     
     // Получаем список работ для выпадающего списка
     $sql_works = "SELECT id, name, quantity, unit FROM LIFTEH_work ORDER BY name";
@@ -105,12 +122,12 @@ try {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($avr_records)): ?>
+                    <?php if (empty($active_records)): ?>
                         <tr>
-                            <td colspan="5" class="text-center">Нет данных</td>
+                            <td colspan="5" class="text-center">Нет активных записей</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($avr_records as $record): ?>
+                        <?php foreach ($active_records as $record): ?>
                             <tr data-id="<?= htmlspecialchars((string) $record['id'], ENT_QUOTES, 'UTF-8') ?>">
 
                                 <td><strong><?= htmlspecialchars($record['id']) ?></strong><br>
@@ -155,10 +172,65 @@ try {
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
+
+                            <!-- Строка аккордеона -->
+                    <?php if (count($archived_records) > 0): ?>
+                        <tr class="accordion-row" id="accordionRow" style="background-color: #f5f5f5; cursor: pointer;">
+                            <td colspan="5" style="padding: 12px; text-align: center; font-weight: bold;" onclick="toggleArchivedAvr()">
+                                <span id="accordionIcon">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                                Выполненные и отложенные 
+                                <span style="background-color: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 8px;">
+                                    <?= count($archived_records) ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
+
+
+                    <!-- Скрытые архивные записи -->
+                <?php if (count($archived_records) > 0): ?>
+                <tbody id="archivedAvrBody" style="display: none;">
+                    <?php foreach ($archived_records as $record): ?>
+                        <tr class="archived-row" data-id="<?= htmlspecialchars((string) $record['id'], ENT_QUOTES, 'UTF-8') ?>">
+                            <td><strong><?= htmlspecialchars($record['id']) ?></strong><br>
+                            <?= date('d.m.Y', strtotime($record['insert_date'])) ?>
+                            </td>
+                            <td>
+                                <?php 
+                                    $object_display = '<strong>' . htmlspecialchars($record['object_customer']) . '</strong>';
+                                    $object_display .= '<br>' . htmlspecialchars($record['object_address'] ?? 'адрес не указан') . '';
+                                    echo $object_display;
+                                ?>
+                            </td>
+                            <td>
+                                <span class="badge bg-info"><?= htmlspecialchars($record['works_count'] ?? '-') ?></span>
+                                <br>
+                                <?= htmlspecialchars($record['problem']) ?>
+                            </td>
+                            <td>
+                                <span class="<?= $record['result'] === 'Выполнено' ? 'status-active' : ($record['result'] === 'В работе' ? 'status-warning' : 'status-inactive') ?>">
+                                    <?= htmlspecialchars($record['result'] ?? 'Не указан') ?>
+                                </span>
+                            </td>
+                            <td class="actions-column">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary edit-avr"
+                                        data-id="<?= htmlspecialchars((string) $record['id'], ENT_QUOTES, 'UTF-8') ?>"
+                                        aria-label="Редактировать запись №<?= htmlspecialchars((string) $record['id'], ENT_QUOTES, 'UTF-8') ?>"
+                                        title="Редактировать">
+                                    <i class="fas fa-edit" aria-hidden="true"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <?php endif; ?>
             </table>
 
-            <div class="count">Найдено записей: <?= count($avr_records); ?></div>
+            <div class="count">Найдено записей: <?= $total_records_count; ?></div>
         </div>
     </div>
 </div>
@@ -195,12 +267,7 @@ $(document).ready(function() {
         $('#addSuccessAlert').addClass('d-none');
         
         const formData = new FormData(form[0]);
-        
-        // console.log('Отправляемые данные:');
-        // for (let pair of formData.entries()) {
-        //     console.log(pair[0] + ': ' + pair[1]);
-        // }
-        
+               
         $.ajax({
             url: form.attr('action'),
             type: 'POST',
@@ -247,6 +314,12 @@ function printTable() {
     const temp = document.createElement('div');
     temp.innerHTML = tableHTML;
     temp.querySelectorAll('th:last-child, td.actions-column').forEach(cell => cell.remove());
+
+    // Удаляем скрытые архивные строки и строку аккордеона (если нужно печатать только активные)
+    const archivedBody = temp.querySelector('#archivedAvrBody');
+    if (archivedBody) archivedBody.remove();
+    const accordionRow = temp.querySelector('#accordionRow');
+    if (accordionRow) accordionRow.remove();
     
     const iframe = document.createElement('iframe');
     iframe.style.position = 'absolute';
@@ -284,6 +357,21 @@ function printTable() {
         document.body.removeChild(iframe);
     }, 1000);
 }
+
+// Функция для переключения отображения архивных записей
+function toggleArchivedAvr() {
+    const body = document.getElementById('archivedAvrBody');
+    const icon = document.querySelector('#accordionIcon i');
+    
+    if (body.style.display === 'none') {
+        body.style.display = ''; // показываем
+        if (icon) icon.className = 'fas fa-chevron-up';
+    } else {
+        body.style.display = 'none'; // скрываем
+        if (icon) icon.className = 'fas fa-chevron-down';
+    }
+}
+
 
 // Функции для открытия/закрытия модальных окон
 function openAddModal() {

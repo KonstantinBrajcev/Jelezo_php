@@ -3,9 +3,9 @@
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../modules/auth/auth.php';
 checkAuth();
-checkSuperuser();
+// checkSuperuser();
 
-header('Content-Type: application/json');
+// header('Content-Type: application/json');
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

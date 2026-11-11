@@ -1,6 +1,6 @@
 <?php
 // get_avr_ajax.php
-// Включите отображение ошибок для отладки
+// отображение ошибок для отладки
 ob_start();
 
 error_reporting(E_ALL);
@@ -9,7 +9,7 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../modules/auth/auth.php';
 checkAuth();
-checkSuperuser();
+// checkSuperuser();
 
 header('Content-Type: application/json');
 
