@@ -392,13 +392,19 @@ function createPlacemark(obj, coordinates, index) {
     }
 
     const template = generateBalloonTemplate(obj, coordinates, phoneLink);
+
+    let iconPreset = 'islands#blueCircleDotIcon'; 
+    if (obj.active_problems_count > 0) {
+        iconPreset = 'islands#redCircleDotIcon';
+    }
+
     const placemark = new ymaps.Placemark(coordinates, {
-        // objectId: obj.id,  // ДОБАВЬТЕ ЭТУ СТРОКУ
+        // objectId: obj.id,  
         balloonContentHeader: template.header,
         balloonContentBody: template.body,
         hintContent: obj.address || obj.customer || 'Объект'
     }, {
-        preset: 'islands#blueCircleDotIcon',
+        preset: iconPreset,
         balloonCloseButton: true,
         balloonAutoPan: true
     });

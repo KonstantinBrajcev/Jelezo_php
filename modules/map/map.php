@@ -90,7 +90,9 @@ try {
 
 
     // 4. Объекты для отображения на карте (без ТО в текущем месяце)
-    $sql = "SELECT o.* 
+    $sql = "SELECT o.*,
+                   (SELECT COUNT(*) FROM LIFTEH_problem p 
+                    WHERE p.object_id = o.id AND p.is_completed = 0) as active_problems_count
             FROM LIFTEH_object o
             LEFT JOIN LIFTEH_service s ON o.id = s.object_id 
                 AND strftime('%Y-%m', s.service_date) = strftime('%Y-%m', 'now')
@@ -98,7 +100,11 @@ try {
                 AND o.$monthColumn IS NOT NULL
                 AND o.$monthColumn != '' 
                 AND CAST(o.$monthColumn AS TEXT) != '0'
-                AND s.id IS NULL ";
+                AND (
+                    s.id IS NULL 
+                    OR 
+                    (SELECT COUNT(*) FROM LIFTEH_problem p WHERE p.object_id = o.id AND p.is_completed = 0) > 0
+                )";
 
     $stmt = $pdo->query($sql);
     $objects = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -111,6 +117,7 @@ try {
 $mapData = [];
 $withCoords = 0;
 $withoutCoords = 0;
+$activeRepairsCount = 0;
 
 foreach ($objects as $obj) {
     // Берем координаты
@@ -125,6 +132,11 @@ foreach ($objects as $obj) {
         
         // Проверяем, что это числа
         if (is_numeric($lat) && is_numeric($lng)) {
+            $problemsCount = (int)($obj['active_problems_count'] ?? 0);
+            // Если есть активная проблема (ремонт) - увеличиваем счетчик
+            if ($problemsCount > 0) {
+                $activeRepairsCount++;
+            }
             $mapData[] = [
                 // 'id' => $obj['id'] ?? null,
                 'id' => (int)$obj['id'],
@@ -134,7 +146,8 @@ foreach ($objects as $obj) {
                 'phone' => $obj['phone'] ?? '',
                 'name' => $obj['name'] ?? '',
                 'lat' => (float)$lat,
-                'lng' => (float)$lng
+                'lng' => (float)$lng,
+                'active_problems_count' => $problemsCount
             ];
             $withCoords++;
         } else {
@@ -203,15 +216,15 @@ if ($mapDataJson === false) {
         
         <div class="progress-stats">
             <div class="progress-stat">
-                <span class="stat-label">Всего объектов</span>
+                <span class="stat-label">Всего</span>
                 <span class="stat-value status-total"><?php echo $totalObjects; ?></span>
             </div>
             <div class="progress-stat">
-                <span class="stat-label">Выполнено ТО</span>
+                <span class="stat-label">Выполнено</span>
                 <span class="stat-value status-working"><?php echo $completedObjects; ?></span>
             </div>
             <div class="progress-stat">
-            <span class="stat-label">Статусы ТО</span>
+            <span class="stat-label">Статусы</span>
                 <div class="stat-values">
                     <span class="stat-value status-working" id="statWorking"><?php echo $workingCount; ?></span>
                     <span class="stat-separator">/</span>
@@ -219,6 +232,10 @@ if ($mapDataJson === false) {
                     <span class="stat-separator">/</span>
                     <span class="stat-value status-not-working" id="statNotWorking"><?php echo $notWorkingCount; ?></span>
                 </div>
+            </div>
+            <div class="progress-stat">
+                <span class="stat-label">Ремонты</span>
+                <span class="stat-value" style="color: #f44336; font-weight: bold;"><?php echo $activeRepairsCount; ?></span>
             </div>
             <div class="progress-stat">
                 <span class="stat-label">Осталось</span>

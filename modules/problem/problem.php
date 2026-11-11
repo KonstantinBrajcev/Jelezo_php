@@ -22,29 +22,58 @@ $db->exec("CREATE TABLE IF NOT EXISTS LIFTEH_problem (
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_completed INTEGER DEFAULT 0,
     user_id INTEGER,
-    priority INTEGER DEFAULT 0
+    priority INTEGER DEFAULT 0,
+    object_id INTEGER
 )");
+
+// Проверяем, существует ли колонка object_id (если таблица была создана ранее)
+try {
+    $check_col = $db->query("PRAGMA table_info(LIFTEH_problem)")->fetchAll(PDO::FETCH_ASSOC);
+    $has_object_id = false;
+    foreach ($check_col as $col) {
+        if ($col['name'] === 'object_id') {
+            $has_object_id = true;
+            break;
+        }
+    }
+    if (!$has_object_id) {
+        $db->exec("ALTER TABLE LIFTEH_problem ADD COLUMN object_id INTEGER");
+    }
+} catch (Exception $e) {
+    // Игнорируем ошибку, если колонка уже есть
+}
+
+// Получаем список объектов для выпадающего списка
+try {
+    $stmtObjects = $db->query("SELECT id, customer, address FROM LIFTEH_object ORDER BY customer, address");
+    $objectsList = $stmtObjects->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $objectsList = [];
+}
+
 // Обработка POST запросов
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'add':
                 // Исправлено: добавлено поле created_date с текущей датой
-                $stmt = $db->prepare("INSERT INTO LIFTEH_problem (name, user_id, created_date, is_completed, priority) 
+                $stmt = $db->prepare("INSERT INTO LIFTEH_problem (name, user_id, created_date, is_completed, priority, object_id) 
                           VALUES (:name, :user_id, datetime('now', 'localtime'), 0, 
-                          (SELECT IFNULL(MAX(priority), 0) + 1 FROM LIFTEH_problem))");
+                          (SELECT IFNULL(MAX(priority), 0) + 1 FROM LIFTEH_problem), :object_id)");
                 $stmt->execute([
                     ':name' => $_POST['name'],
                     ':user_id' => $currentUser['id'] ?? null,
+                    ':object_id' => !empty($_POST['object_id']) ? (int)$_POST['object_id'] : null,
                 ]);
                 break;
 
             case 'edit':
-                $stmt = $db->prepare("UPDATE LIFTEH_problem SET name = :name, user_id = :user_id WHERE id = :id");
+                $stmt = $db->prepare("UPDATE LIFTEH_problem SET name = :name, user_id = :user_id, object_id = :object_id  WHERE id = :id");
                 $stmt->execute([
                     ':id' => $_POST['id'],
                     ':name' => $_POST['name'],
-                    ':user_id' => $currentUser['id'] // Используем ID текущего пользователя
+                    ':user_id' => $currentUser['id'], // Используем ID текущего пользователя
+                    ':object_id' => !empty($_POST['object_id']) ? (int)$_POST['object_id'] : null, 
                 ]);
                 break;
 
@@ -340,6 +369,18 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
             <form id="addForm" onsubmit="return submitAddForm(event)">
                 <input type="hidden" name="action" value="add">
 
+                <!-- Выбор объекта -->
+                <div class="form-group form-floating mb-3">
+                    <select class="form-control" id="add_object_id" name="object_id">
+                        <option value="">-- Выберите адрес (необязательно) --</option>
+                        <?php foreach ($objectsList as $obj): ?>
+                            <option value="<?= $obj['id'] ?>">
+                                <?= htmlspecialchars($obj['customer']) ?> - <?= htmlspecialchars($obj['address']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label for="add_object_id" class="form-label">Адрес объекта:</label>
+                </div>
 
                 <div class="form-group form-floating">
                     <textarea id="modal_name" class="form-control" name="name" required 
@@ -385,6 +426,20 @@ if (isset($_GET['get_problem']) && !empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
             <form id="editForm" onsubmit="return submitEditForm(event)">
                 <input type="hidden" name="action" value="edit">
                 <input type="hidden" name="id" id="edit_id">
+
+                <!-- Выбор объекта -->
+                <div class="form-group form-floating mb-3">
+                    <select class="form-control" id="edit_object_id" name="object_id">
+                        <option value="">-- Выберите адрес (необязательно) --</option>
+                        <?php foreach ($objectsList as $obj): ?>
+                            <option value="<?= $obj['id'] ?>">
+                                <?= htmlspecialchars($obj['customer']) ?> - <?= htmlspecialchars($obj['address']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label for="edit_object_id" class="form-label">Адрес объекта:</label>
+                </div>
+
                 <div class="form-group form-floating">
                     <textarea id="edit_name" class="form-control" name="name" style="height: 120px; min-height: 80px;" required></textarea>
                     <label for="edit_name" class="form-label">Проблема:</label>

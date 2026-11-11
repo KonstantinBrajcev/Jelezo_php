@@ -47,6 +47,7 @@ async function openEditModal(id) {
     const problem = await response.json();
     document.getElementById('edit_id').value = problem.id;
     document.getElementById('edit_name').value = problem.name;
+    document.getElementById('edit_object_id').value = problem.object_id || '';
     document.getElementById('editModal').style.display = 'block';
   } catch (error) {
     showNotification('Ошибка при загрузке данных', 'error');
